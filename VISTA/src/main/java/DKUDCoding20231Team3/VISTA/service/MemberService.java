@@ -2,6 +2,7 @@ package DKUDCoding20231Team3.VISTA.service;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
+import DKUDCoding20231Team3.VISTA.dto.request.MailCodeRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.MailRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
 import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.ALREADY_SAVED_MEMBER;
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,4 +56,16 @@ public class MemberService {
 
         return HttpStatus.CREATED;
     }
+
+    public HttpStatus checkMail(MailCodeRequest mailCodeRequest) {
+        final String code = redisUtil.getData(mailCodeRequest.getMail());
+        if(code == null || !code.equals(mailCodeRequest.getCode()))
+            throw new VistaException(INVALID_MAIL_CODE);
+
+        redisUtil.deleteData(mailCodeRequest.getMail());
+        redisUtil.setDataExpire(mailCodeRequest.getMail(), "OK", 60000);
+
+        return HttpStatus.CREATED;
+    }
+
 }

@@ -1,9 +1,11 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
+import DKUDCoding20231Team3.VISTA.dto.request.MailCodeRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.MailRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
 import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +42,13 @@ public class MemberController {
     }
 
     @PostMapping("mail")
-    public ResponseEntity<HttpStatus> sendMail(@RequestBody MailRequest mailRequest) {
+    public ResponseEntity<HttpStatus> sendMail(@Valid @RequestBody MailRequest mailRequest) {
         return ResponseEntity.status(memberService.sendMail(mailRequest)).build();
+    }
+
+    @PostMapping("code")
+    public ResponseEntity<HttpStatus> checkMail(@Valid @RequestBody MailCodeRequest mailCodeRequest) {
+        return ResponseEntity.status(memberService.checkMail(mailCodeRequest)).build();
     }
 
 }
