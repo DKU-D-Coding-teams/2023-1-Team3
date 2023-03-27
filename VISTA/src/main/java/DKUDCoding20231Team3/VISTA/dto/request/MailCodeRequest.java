@@ -9,9 +9,12 @@ import lombok.NonNull;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MailRequest {
+public class MailCodeRequest {
 
     @Pattern(regexp = "[0-9]{8}@dankook.ac.kr$")
     private String mail;
+
+    @Pattern(regexp = "[0-9]{6}")
+    private String code;
 
 }
