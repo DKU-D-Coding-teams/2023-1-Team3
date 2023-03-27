@@ -1,5 +1,6 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
+import DKUDCoding20231Team3.VISTA.dto.request.MailRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
 import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
@@ -36,6 +37,11 @@ public class MemberController {
     @DeleteMapping("delete")
     public ResponseEntity<HttpStatus> delete(@RequestParam Long memberId) {
         return ResponseEntity.status(memberService.delete(memberId)).build();
+    }
+
+    @PostMapping("mail")
+    public ResponseEntity<HttpStatus> sendMail(@RequestBody MailRequest mailRequest) {
+        return ResponseEntity.status(memberService.sendMail(mailRequest)).build();
     }
 
 }
