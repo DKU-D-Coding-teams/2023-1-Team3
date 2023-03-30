@@ -1,9 +1,9 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
-import DKUDCoding20231Team3.VISTA.dto.request.MailCodeRequest;
-import DKUDCoding20231Team3.VISTA.dto.request.MailRequest;
-import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
+import DKUDCoding20231Team3.VISTA.dto.request.*;
 import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,18 @@ public class MemberController {
     public ResponseEntity<MemberResponse> create(@RequestBody MemberRequest memberRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(memberService.create(memberRequest));
+    }
+
+    @GetMapping("check")
+    public ResponseEntity<String> check() {
+        System.out.println("hello cehck");
+        return ResponseEntity.status(HttpStatus.OK).body("error check");
+    }
+
+    @PostMapping("test")
+    public String test() {
+        System.out.println("test check");
+        return "success";
     }
 
     @GetMapping("read/{memberId}")
@@ -49,6 +61,16 @@ public class MemberController {
     @PostMapping("code")
     public ResponseEntity<HttpStatus> checkMail(@Valid @RequestBody MailCodeRequest mailCodeRequest) {
         return ResponseEntity.status(memberService.checkMail(mailCodeRequest)).build();
+    }
+
+    @PostMapping("signUp")
+    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(signUpRequest));
+    }
+
+    @PostMapping("signIn")
+    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
     }
 
 }

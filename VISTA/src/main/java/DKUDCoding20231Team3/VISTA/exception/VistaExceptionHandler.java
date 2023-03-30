@@ -30,11 +30,11 @@ public class VistaExceptionHandler {
                 .body(new VistaExceptionDto(errorCode.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<VistaExceptionDto> serverException(Exception ex) {
-        final ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-        return ResponseEntity.status(errorCode.getStatus())
-                .body(new VistaExceptionDto(errorCode.getMessage()));
-    }
+//    @ExceptionHandler(Exception.class)
+//    protected ResponseEntity<VistaExceptionDto> serverException(Exception ex) {
+//        final ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+//        return ResponseEntity.status(errorCode.getStatus())
+//                .body(new VistaExceptionDto(errorCode.getMessage()));
+//    }
 
 }

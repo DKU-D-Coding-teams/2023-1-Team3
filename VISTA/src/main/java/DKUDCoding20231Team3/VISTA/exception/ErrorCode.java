@@ -10,6 +10,9 @@ public enum ErrorCode {
     //400 BAD_REQUEST
     INVALID_PARAMETER(400, "요구하는 형식에 맞지 않는 필드가 존재합니다."),
 
+    //401 UNAUTHORIZED
+    UNAUTHORIZED_MAIL(401, "인증되지 않은 메일입니다."),
+
     //404 NOT_FOUND
     NOT_FOUND(404, "존재하지 않는 값입니다."),
 

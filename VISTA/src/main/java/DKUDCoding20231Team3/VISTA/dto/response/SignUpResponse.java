@@ -2,7 +2,6 @@ package DKUDCoding20231Team3.VISTA.dto.response;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
-import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 @Builder
 @NonNull
 @AllArgsConstructor
-public class MemberResponse {
+public class SignUpResponse {
 
     private Long memberId;
 
@@ -35,8 +34,8 @@ public class MemberResponse {
 
 //    private String role;
 
-    public static MemberResponse of(Member member) {
-        return MemberResponse.builder()
+    public static SignUpResponse of(Member member) {
+        return SignUpResponse.builder()
                 .memberId(member.getMemberId())
                 .mail(member.getMail())
                 .name(member.getName())
