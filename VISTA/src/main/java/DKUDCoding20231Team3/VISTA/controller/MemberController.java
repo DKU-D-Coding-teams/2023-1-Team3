@@ -24,18 +24,6 @@ public class MemberController {
                 .body(memberService.create(memberRequest));
     }
 
-    @GetMapping("check")
-    public ResponseEntity<String> check() {
-        System.out.println("hello cehck");
-        return ResponseEntity.status(HttpStatus.OK).body("error check");
-    }
-
-    @PostMapping("test")
-    public String test() {
-        System.out.println("test check");
-        return "success";
-    }
-
     @GetMapping("read/{memberId}")
     public ResponseEntity<MemberResponse> read(@PathVariable Long memberId) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -64,12 +52,12 @@ public class MemberController {
     }
 
     @PostMapping("signUp")
-    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<SignUpResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(signUpRequest));
     }
 
     @PostMapping("signIn")
-    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) {
+    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
     }
 

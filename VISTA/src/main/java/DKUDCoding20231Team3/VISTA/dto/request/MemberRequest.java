@@ -9,7 +9,6 @@ import lombok.NonNull;
 import java.time.LocalDate;
 
 @Getter
-@NonNull
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberRequest {

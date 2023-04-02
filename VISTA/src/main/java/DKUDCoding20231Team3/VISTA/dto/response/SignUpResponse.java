@@ -30,9 +30,7 @@ public class SignUpResponse {
 
     private String school;
 
-    private String region;
 
-//    private String role;
 
     public static SignUpResponse of(Member member) {
         return SignUpResponse.builder()
@@ -42,8 +40,6 @@ public class SignUpResponse {
                 .gender(member.getGender())
                 .birth(member.getBirth())
                 .school(member.getSchool())
-                .region(member.getRegion())
-//                .role(member.getRole())
                 .build();
     }
 

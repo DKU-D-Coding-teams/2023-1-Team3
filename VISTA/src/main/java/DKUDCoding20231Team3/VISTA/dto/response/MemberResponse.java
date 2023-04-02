@@ -31,10 +31,6 @@ public class MemberResponse {
 
     private String school;
 
-    private String region;
-
-//    private String role;
-
     public static MemberResponse of(Member member) {
         return MemberResponse.builder()
                 .memberId(member.getMemberId())
@@ -43,8 +39,6 @@ public class MemberResponse {
                 .gender(member.getGender())
                 .birth(member.getBirth())
                 .school(member.getSchool())
-                .region(member.getRegion())
-//                .role(member.getRole())
                 .build();
     }
 

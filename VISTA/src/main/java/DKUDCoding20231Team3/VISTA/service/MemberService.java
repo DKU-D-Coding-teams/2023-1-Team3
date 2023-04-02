@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 //import org.springframework.security.core.userdetails.UserDetailsService;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -37,11 +38,9 @@ public class MemberService {
 
     private final RedisUtil redisUtil;
 
-//    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-
     private final JwtTokenProvider jwtTokenProvider;
 
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public MemberResponse create(MemberRequest memberRequest) {
         final Member member = Member.of(memberRequest);
@@ -71,11 +70,8 @@ public class MemberService {
     public HttpStatus sendMail(MailRequest mailRequest) {
         if (memberRepository.existsByMail(mailRequest.getMail())) throw new VistaException(ALREADY_SAVED_MEMBER);
 
-        System.out.println("send mail check1");
         final String code = mailUtil.codeSend(mailRequest.getMail());
-        System.out.println("send mail check2");
         redisUtil.setDataExpire(mailRequest.getMail(), code, 60000);
-        System.out.println("send mail check3");
 
         return HttpStatus.CREATED;
     }
@@ -92,43 +88,29 @@ public class MemberService {
     }
 
     public SignUpResponse signUp(SignUpRequest signUpRequest) {
-
         final String code = redisUtil.getData(signUpRequest.getMail());
 
         if(code == null || !code.equals("OK"))
             throw new VistaException(UNAUTHORIZED_MAIL);
 
-        /*
-            singUpRequest.getPassword() -> encrypt
-         */
-
+        signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         final Member member = Member.of(signUpRequest);
-
         memberRepository.save(member);
 
         return SignUpResponse.of(member);
     }
 
     public SignInResponse signIn(SignInRequest signInRequest) {
-
-//        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(signInRequest.getMail(), signInRequest.getPassword());
-//        Authentication authenication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-//        JwtToken jwtToken = jwtTokenProvider.generateToken(authenication);
-
-//        return SignInResponse.of(jwtToken);
-
         final Member member = memberRepository.findByMail(signInRequest.getMail())
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new VistaException(UNAUTHORIZED_MAIL));
+
+        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword())) {
+            throw new VistaException(INVALID_PASSWORD);
+        }
+
         JwtToken jwtToken = jwtTokenProvider.generateToken(member.getMail());
 
         return SignInResponse.of(jwtToken);
     }
-//
-//    public String createToken(LoginRequest loginRequest) {
-//        User user = userRepository.findByName(loginRequest.getName())
-//                .orElseThrow(IllegalArgumentException::new);
-//        //비밀번호 확인 등의 유효성 검사 진행
-//        return jwtTokenProvider.createToken(user.getName());
-//    }
 
 }
