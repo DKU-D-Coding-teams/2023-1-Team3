@@ -1,9 +1,7 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
 import DKUDCoding20231Team3.VISTA.dto.request.*;
-import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,11 @@ public class MemberController {
     public ResponseEntity<MemberResponse> create(@RequestBody MemberRequest memberRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(memberService.create(memberRequest));
+    }
+
+    @GetMapping("createdummymembers")
+    public ResponseEntity<DummyMembersResponse> create() {
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.DummyMembers());
     }
 
     @GetMapping("read/{memberId}")
@@ -59,6 +62,11 @@ public class MemberController {
     @PostMapping("signIn")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
+    }
+
+    @GetMapping("suggest")
+    public ResponseEntity<SuggestResponse> suggest() {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest());
     }
 
 }

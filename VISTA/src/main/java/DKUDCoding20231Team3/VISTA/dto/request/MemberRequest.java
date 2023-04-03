@@ -26,8 +26,4 @@ public class MemberRequest {
 
     private String school;
 
-    private String region;
-
-    private String role;
-
 }

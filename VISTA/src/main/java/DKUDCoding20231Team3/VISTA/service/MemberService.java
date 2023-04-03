@@ -1,16 +1,18 @@
 package DKUDCoding20231Team3.VISTA.service;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
+import DKUDCoding20231Team3.VISTA.domain.entity.ReturnMember;
+import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
-import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
 import DKUDCoding20231Team3.VISTA.jwt.JwtTokenProvider;
 import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 //import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
@@ -47,6 +50,24 @@ public class MemberService {
         memberRepository.save(member);
 
         return MemberResponse.of(member);
+    }
+
+    public DummyMembersResponse DummyMembers() {
+        Member[] memberList = new Member[10];
+
+        for (int i=0; i<10; i++) {
+            memberList[i] = Member.of(
+                String.valueOf(i+1),
+                String.valueOf(i+1),
+                String.valueOf(i+1),
+                Gender.MALE,
+                LocalDate.now(),
+                String.valueOf(i+1)
+            );
+            memberRepository.save(memberList[i]);
+        }
+
+        return DummyMembersResponse.of(memberList);
     }
 
     public MemberResponse read(Long memberId) {
@@ -111,6 +132,26 @@ public class MemberService {
         JwtToken jwtToken = jwtTokenProvider.generateToken(member.getMail());
 
         return SignInResponse.of(jwtToken);
+    }
+
+    public SuggestResponse suggest() {
+        long max = memberRepository.count();
+        Member[] memberList = new Member[5];
+        ReturnMember[] returnMemberList = new ReturnMember[5];
+
+        for (int i=0; i<5; i++) {
+            Long randomId = (long)(Math.random() * max + 1);
+            memberList[i] = memberRepository.findByMemberId(randomId);
+            returnMemberList[i] = new ReturnMember(
+                    memberList[i].getMemberId(),
+                    memberList[i].getName(),
+                    memberList[i].getGender(),
+                    memberList[i].getBirth(),
+                    memberList[i].getSchool()
+            );
+        }
+
+        return SuggestResponse.of(returnMemberList);
     }
 
 }

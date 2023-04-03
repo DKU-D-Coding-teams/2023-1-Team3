@@ -30,8 +30,6 @@ public class SignUpResponse {
 
     private String school;
 
-
-
     public static SignUpResponse of(Member member) {
         return SignUpResponse.builder()
                 .memberId(member.getMemberId())

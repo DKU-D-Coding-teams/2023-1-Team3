@@ -12,10 +12,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Entity
@@ -77,6 +74,17 @@ public class Member {
         return Member.builder()
                 .mail(signInRequest.getMail())
                 .password(signInRequest.getPassword())
+                .build();
+    }
+
+    public static Member of(String mail, String password, String name, Gender gender, LocalDate localDate, String school) {
+        return Member.builder()
+                .mail(mail)
+                .password(password)
+                .name(name)
+                .gender(gender)
+                .birth(localDate)
+                .school(school)
                 .build();
     }
 
