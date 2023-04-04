@@ -11,7 +11,7 @@ import lombok.NonNull;
 @NoArgsConstructor
 public class MailCodeRequest {
 
-    @Pattern(regexp = "\\w{8,}@dankook\\.ac\\.kr")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\.ac\\.kr$")
     private String mail;
 
     @Pattern(regexp = "[0-9]{6}")
