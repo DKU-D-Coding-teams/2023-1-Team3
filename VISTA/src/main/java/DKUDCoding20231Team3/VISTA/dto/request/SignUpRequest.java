@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class SignUpRequest {
 
-    @Pattern(regexp = "\\w{8,}@dankook\\.ac\\.kr")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\.ac\\.kr$")
     private String mail;
 
     @Setter
