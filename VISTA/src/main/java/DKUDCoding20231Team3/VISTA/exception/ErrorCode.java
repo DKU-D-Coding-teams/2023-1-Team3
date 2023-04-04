@@ -15,7 +15,7 @@ public enum ErrorCode {
 
     //404 NOT_FOUND
     NOT_FOUND(404, "존재하지 않는 값입니다."),
-    NOT_FOUND_MAIL(404, "존재하지 않는 메일입니다.."),
+    NOT_FOUND_MAIL(404, "존재하지 않는 메일입니다."),
 
     //409 CONFLICT
     ALREADY_SAVED_MEMBER(409, "이미 서비스에 가입된 계정입니다."),

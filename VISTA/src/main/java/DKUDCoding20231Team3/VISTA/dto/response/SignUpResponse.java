@@ -28,8 +28,6 @@ public class SignUpResponse {
 
     private LocalDate birth;
 
-    private String school;
-
     public static SignUpResponse of(Member member) {
         return SignUpResponse.builder()
                 .memberId(member.getMemberId())
@@ -37,7 +35,6 @@ public class SignUpResponse {
                 .name(member.getName())
                 .gender(member.getGender())
                 .birth(member.getBirth())
-                .school(member.getSchool())
                 .build();
     }
 
