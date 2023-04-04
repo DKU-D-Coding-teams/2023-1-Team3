@@ -37,8 +37,6 @@ public class Member {
 
     private LocalDate birth;
 
-    private String school;
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Like> likes;
 
@@ -53,7 +51,6 @@ public class Member {
                 .name(signUpRequest.getName())
                 .gender(signUpRequest.getGender())
                 .birth(signUpRequest.getBirth())
-                .school(signUpRequest.getSchool())
                 .build();
     }
 

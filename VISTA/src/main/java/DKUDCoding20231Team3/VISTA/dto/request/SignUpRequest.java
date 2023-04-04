@@ -30,7 +30,4 @@ public class SignUpRequest {
     @NonNull
     private LocalDate birth;
 
-    @NotBlank
-    private String school;
-
 }
