@@ -11,7 +11,7 @@ import lombok.NonNull;
 @NoArgsConstructor
 public class SignInRequest {
 
-    @Pattern(regexp = "\\w{8,}@dankook\\.ac\\.kr")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\.ac\\.kr$")
     private String mail;
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$")

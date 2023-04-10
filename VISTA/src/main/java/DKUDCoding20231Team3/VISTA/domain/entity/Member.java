@@ -5,10 +5,10 @@ import DKUDCoding20231Team3.VISTA.dto.request.MemberRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.SignInRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.SignUpRequest;
 import jakarta.persistence.*;
-import lombok.*;
-//import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.core.userdetails.UserDetails;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,11 +39,6 @@ public class Member {
 
     private LocalDate birth;
 
-    private String school;
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Like> likes;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
@@ -55,7 +50,6 @@ public class Member {
                 .name(memberRequest.getName())
                 .gender(memberRequest.getGender())
                 .birth(memberRequest.getBirth())
-                .school(memberRequest.getSchool())
                 .build();
     }
 
@@ -66,7 +60,6 @@ public class Member {
                 .name(signUpRequest.getName())
                 .gender(signUpRequest.getGender())
                 .birth(signUpRequest.getBirth())
-                .school(signUpRequest.getSchool())
                 .build();
     }
 
@@ -77,14 +70,13 @@ public class Member {
                 .build();
     }
 
-    public static Member of(String mail, String password, String name, Gender gender, LocalDate localDate, String school) {
+    public static Member of(String mail, String password, String name, Gender gender, LocalDate birth) {
         return Member.builder()
                 .mail(mail)
                 .password(password)
                 .name(name)
                 .gender(gender)
-                .birth(localDate)
-                .school(school)
+                .birth(birth)
                 .build();
     }
 
@@ -94,7 +86,6 @@ public class Member {
         this.name = memberRequest.getName();
         this.gender = memberRequest.getGender();
         this.birth = memberRequest.getBirth();
-        this.school = memberRequest.getSchool();
     }
 
 }

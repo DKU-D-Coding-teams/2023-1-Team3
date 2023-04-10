@@ -24,6 +24,4 @@ public class MemberRequest {
 
     private LocalDate birth;
 
-    private String school;
-
 }

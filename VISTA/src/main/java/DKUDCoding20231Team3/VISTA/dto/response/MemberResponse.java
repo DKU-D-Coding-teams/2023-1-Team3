@@ -7,19 +7,15 @@ import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 
 import java.time.LocalDate;
 
 @Getter
 @Builder
-@NonNull
 @AllArgsConstructor
 public class MemberResponse {
 
     private Long memberId;
-
-    private String mail;
 
     private String name;
 
@@ -28,16 +24,12 @@ public class MemberResponse {
 
     private LocalDate birth;
 
-    private String school;
-
-    public static MemberResponse of(Member member) {
+    public static MemberResponse of(Long memberId, String name, Gender gender, LocalDate birth) {
         return MemberResponse.builder()
-                .memberId(member.getMemberId())
-                .mail(member.getMail())
-                .name(member.getName())
-                .gender(member.getGender())
-                .birth(member.getBirth())
-                .school(member.getSchool())
+                .memberId(memberId)
+                .name(name)
+                .gender(gender)
+                .birth(birth)
                 .build();
     }
 
