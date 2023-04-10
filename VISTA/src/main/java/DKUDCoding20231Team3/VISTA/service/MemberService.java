@@ -132,24 +132,20 @@ public class MemberService {
 
     public SuggestResponse suggest(HttpServletRequest httpServletRequest) {
 //        Member requestedMember = findMemberByHttpServlet(httpServletRequest);
-
-        long max = memberRepository.count();
+        Random random = new Random();
+        List suggests = memberRepository.suggestQuery(1L);
         List<MemberResponse> memberResponses = new ArrayList<>();
 
-        List temp = memberRepository.temp(1L);
-
         for (int i=0; i<5; i++) {
-            Random random = new Random();
-            int randomIndex = random.nextInt(temp.size());
-            Object[] randomMember = (Object[]) temp.get(randomIndex);
-            temp.remove(randomMember);
-//            memberLogRepository.saveFromIdAndToId(1L, (Long)randomMember[0]);
-
-            System.out.println("MemberID: " + randomMember[0]);
-            System.out.println("Name: " + randomMember[1]);
-            System.out.println("Gender: " + randomMember[2]);
-            System.out.println("Birth: " + randomMember[3]);
-
+            if (suggests.size() == 0) {
+                memberLogRepository.deleteByFromId(1L);
+                suggests = memberRepository.suggestQuery(1L);
+            }
+            int randomIndex = random.nextInt(suggests.size());
+            Object[] randomMember = (Object[]) suggests.get(randomIndex);
+            suggests.remove(randomMember);
+            MemberLog memberLog = MemberLog.of(1L, (Long)randomMember[0], false);
+            memberLogRepository.save(memberLog);
             MemberResponse memberResponse = MemberResponse.of((Long)randomMember[0], (String)randomMember[1], (Gender)randomMember[2], (LocalDate)randomMember[3]);
             memberResponses.add(memberResponse);
         }
@@ -186,7 +182,7 @@ public class MemberService {
     public HttpStatus makeTestCase() {
         List<Member> members = new ArrayList<>();
 
-        for(int i = 0; i < 30; i++) {
+        for(int i = 0; i < 13; i++) {
             members.add(
                     Member.builder()
                             .mail(String.format("%08d@dankook.ac.kr", i))

@@ -26,6 +26,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Long> findMemberIdByMemberIdNot(Long memberId);
 
     @Query(value = "select m.memberId, m.name, m.gender, m.birth from Member as m where m.memberId <> ?1 and m.memberId not in (select toId from MemberLog where fromId = ?1)")
-    List temp(Long memberId);
+    List suggestQuery(Long memberId);
 
 }
