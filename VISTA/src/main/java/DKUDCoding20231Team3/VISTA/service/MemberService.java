@@ -6,10 +6,7 @@ import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
-import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
 import DKUDCoding20231Team3.VISTA.jwt.JwtTokenProvider;
@@ -26,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
@@ -41,8 +39,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     public HttpStatus sendMail(MailRequest mailRequest) {
-        if (memberRepository.existsByMail(mailRequest.getMail()))
-            throw new VistaException(ALREADY_SAVED_MEMBER);
+        if (memberRepository.existsByMail(mailRequest.getMail())) throw new VistaException(ALREADY_SAVED_MEMBER);
 
         final String code = mailUtil.codeSend(mailRequest.getMail());
         redisUtil.setDataExpire(mailRequest.getMail(), code, 60000);
@@ -63,6 +60,7 @@ public class MemberService {
 
     public SignUpResponse signUp(SignUpRequest signUpRequest) {
         final String code = redisUtil.getData(signUpRequest.getMail());
+
         if(code == null || !code.equals("OK"))
             throw new VistaException(UNAUTHORIZED_MAIL);
 
@@ -75,16 +73,48 @@ public class MemberService {
 
     public SignInResponse signIn(SignInRequest signInRequest) {
         final Member member = memberRepository.findByMail(signInRequest.getMail())
-                .orElseThrow(() -> new VistaException(NOT_FOUND_MAIL));
+                .orElseThrow(() -> new VistaException(UNAUTHORIZED_MAIL));
 
-        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword()))
+        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword())) {
             throw new VistaException(INVALID_PASSWORD);
+        }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(member.getMail());
 
         return SignInResponse.of(jwtToken);
     }
 
+    public SuggestResponse suggest(HttpServletRequest httpServletRequest) {
+        final int SUGGEST_SIZE = 5;
+
+        final Member member = findMemberByHttpServlet(httpServletRequest);
+        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId());
+
+        boolean endPageSignal = false;
+        Random random = new Random();
+        List<MemberResponse> memberResponses = new ArrayList<>();
+        for(int i = 0; i < SUGGEST_SIZE; i++) {
+            if (suggestMembers.size() == 0) {
+                memberLogRepository.deleteByFromId(member.getMemberId());
+                endPageSignal = true;
+                break;
+            }
+            int randomIndex = random.nextInt(suggestMembers.size());
+            MemberListInterface randomMember = suggestMembers.get(randomIndex);
+            suggestMembers.remove(randomMember);
+
+            memberLogRepository.save(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false));
+            memberResponses.add(MemberResponse.of(
+                    randomMember.getMemberId(),
+                    randomMember.getName(),
+                    randomMember.getGender(),
+                    randomMember.getBirth()
+            ));
+        }
+
+        return SuggestResponse.of(endPageSignal, memberResponses);
+    }
+    
     public HttpStatus choiceLike(Long toId, Boolean signal, HttpServletRequest httpServletRequest) {
         MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
                 findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
@@ -130,4 +160,5 @@ public class MemberService {
             throw new VistaException(INVALID_REQUEST_TOKEN);
         }
     }
+    
 }

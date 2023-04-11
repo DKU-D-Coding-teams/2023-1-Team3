@@ -1,17 +1,18 @@
 package DKUDCoding20231Team3.VISTA.domain.entity;
 
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
-import DKUDCoding20231Team3.VISTA.dto.request.SignUpRequest;
+import DKUDCoding20231Team3.VISTA.dto.request.*;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
 
+import java.time.LocalDate;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor @NoArgsConstructor
 @Table(name = "MEMBER_TABLE")
+//public class Member implements UserDetails {
 public class Member {
 
     @Id

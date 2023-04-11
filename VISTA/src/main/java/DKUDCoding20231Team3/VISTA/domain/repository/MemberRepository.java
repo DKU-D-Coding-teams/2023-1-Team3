@@ -17,6 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByMail(String mail);
 
+    @Query(value = "select m.memberId as memberId, m.name as name, m.gender as gender, m.birth as birth from Member as m where m.memberId <> ?1 and m.memberId not in (select toId from MemberLog where fromId = ?1)")
+    List<MemberListInterface> getSuggestQuery(Long memberId);
+
     @Query(value = "select m.memberId as memberId, m.name as name, m.gender as gender, m.birth as birth from Member as m where m.memberId in (select toId from MemberLog where fromId = ?1 and signal = true) order by m.memberId asc")
     List<MemberListInterface> getLikeQuery(Long memberId, Pageable pageable);
 
