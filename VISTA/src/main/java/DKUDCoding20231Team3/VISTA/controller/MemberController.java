@@ -27,12 +27,12 @@ public class MemberController {
         return ResponseEntity.status(memberService.checkMail(mailCodeRequest)).build();
     }
 
-    @PostMapping("signUp")
+    @PostMapping("signup")
     public ResponseEntity<SignUpResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(signUpRequest));
     }
 
-    @PostMapping("signIn")
+    @PostMapping("signin")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
     }
@@ -40,6 +40,18 @@ public class MemberController {
     @GetMapping("suggest")
     public ResponseEntity<SuggestResponse> suggest(HttpServletRequest httpServletRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(httpServletRequest));
+
+    @PutMapping("choice")
+    public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
+                                                 @RequestParam("signal") Boolean signal,
+                                                 HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(memberService.choiceLike(toId, signal, httpServletRequest)).build();
+    }
+
+    @GetMapping("likes")
+    public ResponseEntity<LikeResponse> getLikes(@RequestParam("page") Integer page,
+                                                 HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getLikes(page, httpServletRequest));
     }
 
 }

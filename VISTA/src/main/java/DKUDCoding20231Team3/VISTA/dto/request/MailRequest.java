@@ -8,9 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 public class MailRequest {
 
-    // 단국대학교 이메일 형식: 도메인 앞에 영문자도 가능하도록
-
-    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\\\.ac\\\\.kr$")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\.ac\\.kr$")
     private String mail;
 
 }

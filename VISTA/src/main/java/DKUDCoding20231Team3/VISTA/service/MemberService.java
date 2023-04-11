@@ -14,7 +14,10 @@ import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -111,6 +114,36 @@ public class MemberService {
 
         return SuggestResponse.of(endPageSignal, memberResponses);
     }
+    
+    public HttpStatus choiceLike(Long toId, Boolean signal, HttpServletRequest httpServletRequest) {
+        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
+                findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
+
+        memberLog.setSignal(signal);
+        memberLogRepository.save(memberLog);
+
+        return HttpStatus.OK;
+    }
+
+    public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
+        final int LIKE_PAGE_SIZE = 3;
+        List<MemberListInterface> likeMembers = memberRepository.getLikeQuery(
+                findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
+
+        boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
+        List<MemberResponse> memberResponses = new ArrayList<>();
+        for(MemberListInterface likeMember : likeMembers) {
+            memberResponses.add(MemberResponse.of(
+                    likeMember.getMemberId(),
+                    likeMember.getName(),
+                    likeMember.getGender(),
+                    likeMember.getBirth()
+            ));
+        }
+
+        return LikeResponse.of(endPageSignal, memberResponses);
+    }
 
     private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
         final String token = jwtTokenProvider.resolveToken(httpServletRequest);
@@ -127,5 +160,5 @@ public class MemberService {
             throw new VistaException(INVALID_REQUEST_TOKEN);
         }
     }
-
+    
 }
