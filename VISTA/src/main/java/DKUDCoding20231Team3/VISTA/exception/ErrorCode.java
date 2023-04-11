@@ -15,7 +15,6 @@ public enum ErrorCode {
 
     //404 NOT_FOUND
     NOT_FOUND(404, "존재하지 않는 값입니다."),
-    NOT_FOUND_MAIL(404, "존재하지 않는 메일입니다."),
     NOT_FOUND_MEMBER(404, "존재하지 않는 사용자입니다."),
     NOT_FOUND_MEMBER_LOG(404, "존재하지 않는 사용자 관계입니다."),
 

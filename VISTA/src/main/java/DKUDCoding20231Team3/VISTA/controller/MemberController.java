@@ -1,7 +1,10 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
 import DKUDCoding20231Team3.VISTA.dto.request.*;
-import DKUDCoding20231Team3.VISTA.dto.response.*;
+import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.SuggestResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -40,6 +43,7 @@ public class MemberController {
     @GetMapping("suggest")
     public ResponseEntity<SuggestResponse> suggest(HttpServletRequest httpServletRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(httpServletRequest));
+    }
 
     @PutMapping("choice")
     public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
