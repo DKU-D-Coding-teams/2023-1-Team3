@@ -1,8 +1,13 @@
 package DKUDCoding20231Team3.VISTA.service;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
+import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
+import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
+import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
+import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
@@ -10,10 +15,17 @@ import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
 import DKUDCoding20231Team3.VISTA.jwt.JwtTokenProvider;
 import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
@@ -22,6 +34,7 @@ import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberLogRepository memberLogRepository;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
@@ -72,4 +85,49 @@ public class MemberService {
         return SignInResponse.of(jwtToken);
     }
 
+    public HttpStatus choiceLike(Long toId, Boolean signal, HttpServletRequest httpServletRequest) {
+        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
+                findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
+
+        memberLog.setSignal(signal);
+        memberLogRepository.save(memberLog);
+
+        return HttpStatus.OK;
+    }
+
+    public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
+        final int LIKE_PAGE_SIZE = 3;
+        List<MemberListInterface> likeMembers = memberRepository.getLikeQuery(
+                findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
+
+        boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
+        List<MemberResponse> memberResponses = new ArrayList<>();
+        for(MemberListInterface likeMember : likeMembers) {
+            memberResponses.add(MemberResponse.of(
+                    likeMember.getMemberId(),
+                    likeMember.getName(),
+                    likeMember.getGender(),
+                    likeMember.getBirth()
+            ));
+        }
+
+        return LikeResponse.of(endPageSignal, memberResponses);
+    }
+
+    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
+        final String token = jwtTokenProvider.resolveToken(httpServletRequest);
+
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            if (jwtTokenProvider.validateToken(jwt)) {
+                return memberRepository.findByMail(jwtTokenProvider.getSubject(jwt))
+                        .orElseThrow(() -> new VistaException(NOT_FOUND_MAIL));
+            }
+            else
+                throw new VistaException(INVALID_ACCESS_TOKEN);
+        } else {
+            throw new VistaException(INVALID_REQUEST_TOKEN);
+        }
+    }
 }

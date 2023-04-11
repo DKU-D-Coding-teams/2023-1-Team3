@@ -3,6 +3,7 @@ package DKUDCoding20231Team3.VISTA.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.security.core.authority.SimpleGrantedAuthority;
 //import org.springframework.security.core.userdetails.User;
 //import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -146,15 +148,17 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    //토큰에서 값 추출
     public String getSubject(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    //유효한 토큰인지 확인
+    public String resolveToken(HttpServletRequest httpServletRequest) {
+        return httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+    }
+
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             if (claims.getBody().getExpiration().before(new Date())) {
                 return false;
             }
