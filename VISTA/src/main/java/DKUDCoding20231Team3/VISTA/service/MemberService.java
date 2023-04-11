@@ -15,9 +15,7 @@ import DKUDCoding20231Team3.VISTA.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +71,7 @@ public class MemberService {
 
     public SignInResponse signIn(SignInRequest signInRequest) {
         final Member member = memberRepository.findByMail(signInRequest.getMail())
-                .orElseThrow(() -> new VistaException(UNAUTHORIZED_MAIL));
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword())) {
             throw new VistaException(INVALID_PASSWORD);
@@ -88,7 +86,7 @@ public class MemberService {
         final int SUGGEST_SIZE = 5;
 
         final Member member = findMemberByHttpServlet(httpServletRequest);
-        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId());
+        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
 
         boolean endPageSignal = false;
         Random random = new Random();
@@ -152,7 +150,7 @@ public class MemberService {
             String jwt = token.substring(7);
             if (jwtTokenProvider.validateToken(jwt)) {
                 return memberRepository.findByMail(jwtTokenProvider.getSubject(jwt))
-                        .orElseThrow(() -> new VistaException(NOT_FOUND_MAIL));
+                        .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
             }
             else
                 throw new VistaException(INVALID_ACCESS_TOKEN);
