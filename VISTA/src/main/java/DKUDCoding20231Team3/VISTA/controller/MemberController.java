@@ -4,6 +4,7 @@ import DKUDCoding20231Team3.VISTA.dto.request.*;
 import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,17 @@ public class MemberController {
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
     }
+
+    @PutMapping("choice")
+    public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
+                                                 @RequestParam("signal") Boolean signal,
+                                                 HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(memberService.choiceLike(toId, signal, httpServletRequest)).build();
+    }
+
+//    @GetMapping("likes")
+//    public ResponseEntity<HttpStatus> getLikes(@RequestParam SignInRequest signInRequest) {
+//        return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
+//    }
 
 }
