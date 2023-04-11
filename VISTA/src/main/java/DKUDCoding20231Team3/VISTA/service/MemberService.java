@@ -86,7 +86,7 @@ public class MemberService {
         final int SUGGEST_SIZE = 5;
 
         final Member member = findMemberByHttpServlet(httpServletRequest);
-        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId());
+        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
 
         boolean endPageSignal = false;
         Random random = new Random();
