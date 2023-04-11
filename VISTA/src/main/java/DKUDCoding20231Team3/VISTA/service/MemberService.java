@@ -4,7 +4,10 @@ import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
+import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
+import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.MemberResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
@@ -14,9 +17,15 @@ import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
@@ -85,6 +94,25 @@ public class MemberService {
         memberLogRepository.save(memberLog);
 
         return HttpStatus.OK;
+    }
+
+    public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
+        final int LIKE_PAGE_SIZE = 3;
+        List<MemberListInterface> likeMembers = memberRepository.getLikeQuery(
+                findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
+
+        boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
+        List<MemberResponse> memberResponses = new ArrayList<>();
+        for(MemberListInterface likeMember : likeMembers) {
+            memberResponses.add(MemberResponse.of(
+                    likeMember.getMemberId(),
+                    likeMember.getName(),
+                    likeMember.getGender(),
+                    likeMember.getBirth()
+            ));
+        }
+
+        return LikeResponse.of(endPageSignal, memberResponses);
     }
 
     private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {

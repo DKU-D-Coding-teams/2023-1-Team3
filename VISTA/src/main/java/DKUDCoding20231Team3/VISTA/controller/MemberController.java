@@ -1,6 +1,7 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
 import DKUDCoding20231Team3.VISTA.dto.request.*;
+import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
 import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
@@ -45,9 +46,10 @@ public class MemberController {
         return ResponseEntity.status(memberService.choiceLike(toId, signal, httpServletRequest)).build();
     }
 
-//    @GetMapping("likes")
-//    public ResponseEntity<HttpStatus> getLikes(@RequestParam SignInRequest signInRequest) {
-//        return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(signInRequest));
-//    }
+    @GetMapping("likes")
+    public ResponseEntity<LikeResponse> getLikes(@RequestParam("page") Integer page,
+                                                 HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getLikes(page, httpServletRequest));
+    }
 
 }
