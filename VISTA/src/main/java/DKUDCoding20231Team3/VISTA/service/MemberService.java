@@ -133,13 +133,13 @@ public class MemberService {
     public SuggestResponse suggest(HttpServletRequest httpServletRequest) {
 //        Member requestedMember = findMemberByHttpServlet(httpServletRequest);
         Random random = new Random();
-        List suggests = memberRepository.suggestQuery(1L);
+        List suggests = memberRepository.suggestQuery(1L, Gender.MALE);
         List<MemberResponse> memberResponses = new ArrayList<>();
 
         for (int i=0; i<5; i++) {
             if (suggests.size() == 0) {
                 memberLogRepository.deleteByFromId(1L);
-                suggests = memberRepository.suggestQuery(1L);
+                break;
             }
             int randomIndex = random.nextInt(suggests.size());
             Object[] randomMember = (Object[]) suggests.get(randomIndex);
@@ -149,15 +149,6 @@ public class MemberService {
             MemberResponse memberResponse = MemberResponse.of((Long)randomMember[0], (String)randomMember[1], (Gender)randomMember[2], (LocalDate)randomMember[3]);
             memberResponses.add(memberResponse);
         }
-
-        /*
-            1. A는 모든 유저 아이디 리스트
-            2. A에서 내 아이디를 제외
-            3. A에서 내가 이전에 봤던 사람들의 아이디를 제외
-            4. A에서 5개의 아이디 랜덤 추출, 새로운 아이디 리스트 B에 저장
-            5. B에 담긴 아이디를 이용하여 멤버 테이블에서 멤버 정보 추출
-            6. 반환
-         */
 
         return SuggestResponse.of(memberResponses);
 
@@ -177,39 +168,6 @@ public class MemberService {
         } else {
             throw new VistaException(INVALID_REQUEST_TOKEN);
         }
-    }
-
-    public HttpStatus makeTestCase() {
-        List<Member> members = new ArrayList<>();
-
-        for(int i = 0; i < 13; i++) {
-            members.add(
-                    Member.builder()
-                            .mail(String.format("%08d@dankook.ac.kr", i))
-                            .password("1q2w3e4r1!")
-                            .name(String.format("%08dHGD", i))
-                            .gender((i%2 != 0) ? Gender.FEMALE : Gender.MALE)
-                            .birth(LocalDate.now())
-                            .build()
-            );
-        }
-        memberRepository.saveAll(members);
-
-        List<MemberLog> memberLogs = new ArrayList<>();
-
-        for(int i = 0; i < 5; i++) {
-            memberLogs.add(
-                    MemberLog.builder()
-                            .fromId(1L)
-                            .toId((long) ((i+1)*2))
-                            .signal((i%2 != 0) ? true : false)
-                            .build()
-            );
-        }
-        memberLogRepository.saveAll(memberLogs);
-
-        return HttpStatus.CREATED;
-
     }
 
 }

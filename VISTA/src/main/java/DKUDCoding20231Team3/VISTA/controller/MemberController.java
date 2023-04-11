@@ -70,16 +70,4 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(httpServletRequest));
     }
 
-//    @PutMapping("choice")
-//    public ResponseEntity<Integer> choiceLike(@RequestParam("id") Long memberId,
-//                                              @RequestParam("sign") Boolean sign,
-//                                              HttpServletRequest httpServletRequest) {
-//        return ResponseEntity.status(memberService.choiceLike(memberId, sign, httpServletRequest)).build();
-//    }
-
-    @GetMapping("makeTestCase")
-    public HttpStatus makeTestCase() {
-        return memberService.makeTestCase();
-    }
-
 }
