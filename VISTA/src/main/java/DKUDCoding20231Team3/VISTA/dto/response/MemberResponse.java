@@ -1,6 +1,5 @@
 package DKUDCoding20231Team3.VISTA.dto.response;
 
-import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

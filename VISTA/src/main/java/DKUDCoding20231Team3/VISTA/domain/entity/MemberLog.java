@@ -1,15 +1,13 @@
 package DKUDCoding20231Team3.VISTA.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor @NoArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "MEMBER_LOG_TABLE")
 public class MemberLog {
 
@@ -22,7 +20,7 @@ public class MemberLog {
 
     private Long toId;
 
-//    @ColumnDefault()
+    @Setter
     private boolean signal;
 
     public static MemberLog of(Long fromId, Long toId, boolean signal) {
