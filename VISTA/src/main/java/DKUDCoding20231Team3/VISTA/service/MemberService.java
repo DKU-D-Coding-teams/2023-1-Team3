@@ -73,9 +73,8 @@ public class MemberService {
         final Member member = memberRepository.findByMail(signInRequest.getMail())
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
-        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword())) {
+        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
-        }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(member.getMail());
 
@@ -141,6 +140,18 @@ public class MemberService {
         }
 
         return LikeResponse.of(endPageSignal, memberResponses);
+    }
+
+    public HttpStatus resetPassword(ResetPasswordRequest resetPasswordRequest, HttpServletRequest httpServletRequest) {
+        Member member = findMemberByHttpServlet(httpServletRequest);
+
+        if(!passwordEncoder.matches(resetPasswordRequest.getCurrentPassword(), member.getPassword()))
+            throw new VistaException(INVALID_PASSWORD);
+
+        member.setPassword(passwordEncoder.encode(resetPasswordRequest.getFuturePassword()));
+        memberRepository.save(member);
+
+        return HttpStatus.OK;
     }
 
     private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
