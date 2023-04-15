@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor @NoArgsConstructor
 @Table(name = "MEMBER_TABLE")
-//public class Member implements UserDetails {
 public class Member {
 
     @Id
@@ -22,6 +21,7 @@ public class Member {
 
     private String mail;
 
+    @Setter
     private String password;
 
     private String name;

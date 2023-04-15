@@ -58,4 +58,10 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getLikes(page, httpServletRequest));
     }
 
+    @PostMapping("reset")
+    public ResponseEntity<HttpStatus> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest,
+                                                    HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(memberService.resetPassword(resetPasswordRequest, httpServletRequest)).build();
+    }
+
 }
