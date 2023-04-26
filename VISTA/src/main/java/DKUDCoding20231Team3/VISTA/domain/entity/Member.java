@@ -31,6 +31,9 @@ public class Member {
 
     private LocalDate birth;
 
+    @Setter
+    private String image;
+
     public static Member of(SignUpRequest signUpRequest) {
         return Member.builder()
                 .mail(signUpRequest.getMail())
@@ -38,6 +41,7 @@ public class Member {
                 .name(signUpRequest.getName())
                 .gender(signUpRequest.getGender())
                 .birth(signUpRequest.getBirth())
+                .image("default")
                 .build();
     }
 
