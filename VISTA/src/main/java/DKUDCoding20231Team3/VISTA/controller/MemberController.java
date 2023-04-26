@@ -1,17 +1,18 @@
 package DKUDCoding20231Team3.VISTA.controller;
 
 import DKUDCoding20231Team3.VISTA.dto.request.*;
-import DKUDCoding20231Team3.VISTA.dto.response.LikeResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SignUpResponse;
-import DKUDCoding20231Team3.VISTA.dto.response.SuggestResponse;
+import DKUDCoding20231Team3.VISTA.dto.response.*;
+import DKUDCoding20231Team3.VISTA.exception.ErrorCode;
+import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.tool.schema.spi.ExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -69,9 +70,10 @@ public class MemberController {
     }
 
     @PostMapping("images")
-    public ResponseEntity<HttpStatus> uploadImage(@RequestParam("image") MultipartFile image,
-                                                    HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
-        return ResponseEntity.status(memberService.uploadImage(image, httpServletRequest)).build();
+    public ResponseEntity<MemberResponse> uploadImage(@RequestParam("image") MultipartFile image,
+                                                      HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
+        if(image.getSize() == 0) throw new VistaException(ErrorCode.INVALID_MULTIPART_REQUEST);
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.uploadImage(image, httpServletRequest));
     }
 
 }
