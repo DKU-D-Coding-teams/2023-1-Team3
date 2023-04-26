@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,6 +66,12 @@ public class MemberController {
     public ResponseEntity<HttpStatus> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest,
                                                     HttpServletRequest httpServletRequest) {
         return ResponseEntity.status(memberService.resetPassword(resetPasswordRequest, httpServletRequest)).build();
+    }
+
+    @PostMapping("images")
+    public ResponseEntity<HttpStatus> uploadImage(@RequestParam("image") MultipartFile image,
+                                                    HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
+        return ResponseEntity.status(memberService.uploadImage(image, httpServletRequest)).build();
     }
 
 }
