@@ -110,7 +110,8 @@ public class MemberService {
                     randomMember.getMemberId(),
                     randomMember.getName(),
                     randomMember.getGender(),
-                    randomMember.getBirth()
+                    randomMember.getBirth(),
+                    randomMember.getImage()
             ));
         }
 
@@ -140,7 +141,8 @@ public class MemberService {
                     likeMember.getMemberId(),
                     likeMember.getName(),
                     likeMember.getGender(),
-                    likeMember.getBirth()
+                    likeMember.getBirth(),
+                    likeMember.getImage()
             ));
         }
 
@@ -159,15 +161,13 @@ public class MemberService {
         return HttpStatus.OK;
     }
 
-    public HttpStatus uploadImage(MultipartFile image, HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
-//        Member member = findMemberByHttpServlet(httpServletRequest);
+    public MemberResponse uploadImage(MultipartFile image, HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
+        Member member = findMemberByHttpServlet(httpServletRequest);
 
-        String imageLink = ociUtil.putImage("32171290@dankook.ac.kr", image);
+        member.setImage(ociUtil.putImage(member.getMail(), image));
+        memberRepository.save(member);
 
-
-        // 이미지 링크 멤버에 저장 로직
-
-        return HttpStatus.OK;
+        return MemberResponse.of(member);
     }
 
     private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
