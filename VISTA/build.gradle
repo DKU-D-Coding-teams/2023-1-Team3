@@ -35,6 +35,11 @@ dependencies {
 //	implementation 'com.oracle.database.security:osdt_core:21.9.0.0'
 //	implementation 'com.oracle.database.security:osdt_cert:21.9.0.0'
 
+	// oci
+	implementation "com.oracle.oci.sdk:oci-java-sdk-common:3.12.0"
+	implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.12.0'
+	implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.8.0'
+
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
