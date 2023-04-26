@@ -11,6 +11,7 @@ import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
 import DKUDCoding20231Team3.VISTA.jwt.JwtTokenProvider;
 import DKUDCoding20231Team3.VISTA.util.MailUtil;
+import DKUDCoding20231Team3.VISTA.util.OCIUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,6 +37,7 @@ public class MemberService {
     private final MemberLogRepository memberLogRepository;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
+    private final OCIUtil ociUtil;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
@@ -150,6 +155,17 @@ public class MemberService {
 
         member.setPassword(passwordEncoder.encode(resetPasswordRequest.getFuturePassword()));
         memberRepository.save(member);
+
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus uploadImage(MultipartFile image, HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
+//        Member member = findMemberByHttpServlet(httpServletRequest);
+
+        String imageLink = ociUtil.putImage("32171290@dankook.ac.kr", image);
+
+
+        // 이미지 링크 멤버에 저장 로직
 
         return HttpStatus.OK;
     }
