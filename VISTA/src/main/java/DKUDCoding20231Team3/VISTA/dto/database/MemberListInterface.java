@@ -14,4 +14,6 @@ public interface MemberListInterface {
 
     LocalDate getBirth();
 
+    String getImage();
+
 }
