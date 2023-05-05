@@ -1,18 +1,72 @@
 package DKUDCoding20231Team3.VISTA.domain.entity;
 
-import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
-import DKUDCoding20231Team3.VISTA.dto.request.*;
-import jakarta.persistence.*;
-import lombok.*;
+//import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
+//import DKUDCoding20231Team3.VISTA.dto.request.*;
+//import jakarta.persistence.*;
+//import lombok.*;
+//
+//import java.time.LocalDate;
+//
+//@Entity
+//@Getter
+//@Builder
+//@AllArgsConstructor @NoArgsConstructor
+//@Table(name = "MEMBER_TABLE")
+//public class Member {
+//
+//    @Id
+//    @GeneratedValue
+//    @Column(name = "member_id")
+//    private Long memberId;
+//
+//    private String mail;
+//
+//    @Setter
+//    private String password;
+//
+//    private String name;
+//
+//    @Enumerated(EnumType.STRING)
+//    private Gender gender;
+//
+//    private LocalDate birth;
+//
+//    public static Member of(SignUpRequest signUpRequest) {
+//        return Member.builder()
+//                .mail(signUpRequest.getMail())
+//                .password(signUpRequest.getPassword())
+//                .name(signUpRequest.getName())
+//                .gender(signUpRequest.getGender())
+//                .birth(signUpRequest.getBirth())
+//                .build();
+//    }
+//
+//}
+
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Entity
+import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
+import DKUDCoding20231Team3.VISTA.dto.request.SignUpRequest;
+import jakarta.persistence.*;
+
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+
 @Getter
 @Builder
-@AllArgsConstructor @NoArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 @Table(name = "MEMBER_TABLE")
-public class Member {
+public class Member implements UserDetails {
 
     @Id
     @GeneratedValue
@@ -20,7 +74,6 @@ public class Member {
     private Long memberId;
 
     private String mail;
-
     @Setter
     private String password;
 
@@ -31,6 +84,47 @@ public class Member {
 
     private LocalDate birth;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUsername() {
+        return mail;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public static Member of(SignUpRequest signUpRequest) {
         return Member.builder()
                 .mail(signUpRequest.getMail())
@@ -40,5 +134,4 @@ public class Member {
                 .birth(signUpRequest.getBirth())
                 .build();
     }
-
 }

@@ -1,4 +1,4 @@
-package DKUDCoding20231Team3.VISTA.jwt;
+package DKUDCoding20231Team3.VISTA.util.JwtUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.Getter;
 @Data
 @Getter
 @AllArgsConstructor
-public class JwtToken {
+public class Jwt {
 
     private String grantType;
 

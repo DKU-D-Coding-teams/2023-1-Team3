@@ -1,6 +1,6 @@
 package DKUDCoding20231Team3.VISTA.dto.response;
 
-import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
+import DKUDCoding20231Team3.VISTA.util.JwtUtil.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public class SignInResponse {
 
     private String refreshToken;
 
-    public static SignInResponse of(JwtToken jwtToken) {
+    public static SignInResponse of(Jwt jwtToken) {
         return SignInResponse.builder()
                 .grantType(jwtToken.getGrantType())
                 .accessToken(jwtToken.getAccessToken())
