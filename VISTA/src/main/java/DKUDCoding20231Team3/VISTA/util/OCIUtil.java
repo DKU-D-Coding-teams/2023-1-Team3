@@ -36,13 +36,14 @@ public class OCIUtil {
     private ObjectStorage client;
 
     public String putImage(String mail, MultipartFile image) throws IOException, NoSuchAlgorithmException {
-        final String imageName = sha256(mail) + ".png";
+        final String FILENAME_EXTENSION = ".jpeg";
+        final String IMAGE_NAME = sha256(mail) + FILENAME_EXTENSION;
 
         PutObjectRequest putObjectRequest =
                 PutObjectRequest.builder()
                         .namespaceName(getNamespaceName())
                         .bucketName("vista")
-                        .objectName(imageName)
+                        .objectName(IMAGE_NAME)
                         .contentType("multipart/form-data")
                         .contentLength(image.getSize())
                         .putObjectBody(
@@ -50,7 +51,7 @@ public class OCIUtil {
                         .build();
         client.putObject(putObjectRequest);
 
-        return objectStorageLink + imageName;
+        return objectStorageLink + IMAGE_NAME;
     }
 
     private String getNamespaceName() throws IOException {
