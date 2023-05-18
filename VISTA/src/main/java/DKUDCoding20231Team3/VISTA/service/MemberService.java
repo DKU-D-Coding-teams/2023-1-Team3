@@ -124,7 +124,7 @@ public class MemberService {
     }
 
     public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
-        final int LIKE_PAGE_SIZE = 3;
+        final int LIKE_PAGE_SIZE = 8;
         List<MemberInterface> likeMembers = memberRepository.getLikeQuery(
                 findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
 
