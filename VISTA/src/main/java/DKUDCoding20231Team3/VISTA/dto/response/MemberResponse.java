@@ -2,6 +2,7 @@ package DKUDCoding20231Team3.VISTA.dto.response;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
+import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -26,13 +27,19 @@ public class MemberResponse {
 
     private String image;
 
-    public static MemberResponse of(Long memberId, String name, Gender gender, LocalDate birth, String image) {
+    private String department;
+
+    private String introduction;
+
+    public static MemberResponse of(MemberInterface memberInterface) {
         return MemberResponse.builder()
-                .memberId(memberId)
-                .name(name)
-                .gender(gender)
-                .birth(birth)
-                .image(image)
+                .memberId(memberInterface.getMemberId())
+                .name(memberInterface.getName())
+                .gender(memberInterface.getGender())
+                .birth(memberInterface.getBirth())
+                .image(memberInterface.getImage())
+                .department(memberInterface.getDepartment())
+                .introduction(memberInterface.getIntroduction())
                 .build();
     }
 
@@ -43,6 +50,8 @@ public class MemberResponse {
                 .gender(member.getGender())
                 .birth(member.getBirth())
                 .image(member.getImage())
+                .department(member.getDepartment())
+                .introduction(member.getIntroduction())
                 .build();
     }
 }

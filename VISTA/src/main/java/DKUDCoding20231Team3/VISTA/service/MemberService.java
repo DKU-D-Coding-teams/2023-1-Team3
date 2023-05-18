@@ -4,7 +4,7 @@ import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
-import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
+import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
 import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
@@ -90,7 +90,7 @@ public class MemberService {
         final int SUGGEST_SIZE = 5;
 
         final Member member = findMemberByHttpServlet(httpServletRequest);
-        List<MemberListInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
+        List<MemberInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
 
         boolean endPageSignal = false;
         Random random = new Random();
@@ -102,17 +102,11 @@ public class MemberService {
                 break;
             }
             int randomIndex = random.nextInt(suggestMembers.size());
-            MemberListInterface randomMember = suggestMembers.get(randomIndex);
+            MemberInterface randomMember = suggestMembers.get(randomIndex);
             suggestMembers.remove(randomMember);
 
             memberLogRepository.save(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false));
-            memberResponses.add(MemberResponse.of(
-                    randomMember.getMemberId(),
-                    randomMember.getName(),
-                    randomMember.getGender(),
-                    randomMember.getBirth(),
-                    randomMember.getImage()
-            ));
+            memberResponses.add(MemberResponse.of(randomMember));
         }
 
         return SuggestResponse.of(endPageSignal, memberResponses);
@@ -131,19 +125,13 @@ public class MemberService {
 
     public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
         final int LIKE_PAGE_SIZE = 3;
-        List<MemberListInterface> likeMembers = memberRepository.getLikeQuery(
+        List<MemberInterface> likeMembers = memberRepository.getLikeQuery(
                 findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
 
         boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
         List<MemberResponse> memberResponses = new ArrayList<>();
-        for(MemberListInterface likeMember : likeMembers) {
-            memberResponses.add(MemberResponse.of(
-                    likeMember.getMemberId(),
-                    likeMember.getName(),
-                    likeMember.getGender(),
-                    likeMember.getBirth(),
-                    likeMember.getImage()
-            ));
+        for(MemberInterface likeMember : likeMembers) {
+            memberResponses.add(MemberResponse.of(likeMember));
         }
 
         return LikeResponse.of(endPageSignal, memberResponses);

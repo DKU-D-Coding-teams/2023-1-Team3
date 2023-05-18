@@ -4,7 +4,7 @@ import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
 
 import java.time.LocalDate;
 
-public interface MemberListInterface {
+public interface MemberInterface {
 
     Long getMemberId();
 
@@ -15,5 +15,9 @@ public interface MemberListInterface {
     LocalDate getBirth();
 
     String getImage();
+
+    String getDepartment();
+
+    String getIntroduction();
 
 }
