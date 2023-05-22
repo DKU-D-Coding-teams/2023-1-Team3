@@ -30,4 +30,10 @@ public class SignUpRequest {
     @NonNull
     private LocalDate birth;
 
+    @NotBlank
+    private String department;
+
+    @Pattern(regexp = "^\\w{0,100}$")
+    private String introduction;
+
 }

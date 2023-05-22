@@ -34,6 +34,10 @@ public class Member {
     @Setter
     private String image;
 
+    private String department;
+
+    private String introduction;
+
     public static Member of(SignUpRequest signUpRequest) {
         return Member.builder()
                 .mail(signUpRequest.getMail())
@@ -41,7 +45,9 @@ public class Member {
                 .name(signUpRequest.getName())
                 .gender(signUpRequest.getGender())
                 .birth(signUpRequest.getBirth())
-                .image("default")
+                .image("DEFAULT")
+                .department(signUpRequest.getDepartment())
+                .introduction(signUpRequest.getIntroduction())
                 .build();
     }
 

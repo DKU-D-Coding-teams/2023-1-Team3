@@ -43,22 +43,29 @@ public class ChatController {
 
         chatRepository.saveAll(Chat.of(chatMessages));
 
+        for(ChatMessage chatMessage : chatMessages) {
+            log.info("Websocket FETCH : " + chatMessage.getMessage());
+        }
         messagingTemplate.convertAndSend("/topic/" + fetchRequest.getMemberId(),
                 ChatMessageResponse.of(status, chatMessages.size(), chatMessages));
     }
 
     @MessageMapping("/send")
     public void sendMessage(ChatMessage chatMessage, Message<?> message) throws Exception {
-        log.info("Websocket SEND : + " + " " + GsonUtil.toJson(chatMessage));
+        log.info("Websocket SEND : " + GsonUtil.toJson(chatMessage));
 
         if(sessionRepositrory.existByMemberId(chatMessage.getRecvMemberId())) {
             chatRepository.save(Chat.of(chatMessage));
 
             messagingTemplate.convertAndSend("/topic/" + chatMessage.getRecvMemberId(),
                     ChatMessageResponse.of("SEND", 1, chatMessage));
+
+            log.info("Websocket CASE 2 : " + chatMessage.getMessage());
         }
         else {
             redisUtil.setListData(chatMessage);
+
+            log.info("Websocket CASE 1 : " + chatMessage.getMessage());
         }
     }
 

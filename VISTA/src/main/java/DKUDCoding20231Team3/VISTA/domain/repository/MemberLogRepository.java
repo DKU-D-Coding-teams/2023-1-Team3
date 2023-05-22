@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface MemberLogRepository extends JpaRepository<MemberLog, Long> {
 
     @Transactional
-    void deleteByFromId(Long fromId);
+    void deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(Long fromId);
 
     Optional<MemberLog> findByFromIdAndToId(Long fromId, Long toId);
 

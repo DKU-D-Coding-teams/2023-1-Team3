@@ -21,13 +21,17 @@ public class MemberLog {
     private Long toId;
 
     @Setter
-    private boolean signal;
+    private boolean likeSignal;
 
-    public static MemberLog of(Long fromId, Long toId, boolean signal) {
+    @Setter
+    private boolean blockSignal;
+
+    public static MemberLog of(Long fromId, Long toId, boolean likeSignal, boolean blockSignal) {
         return MemberLog.builder()
                 .fromId(fromId)
                 .toId(toId)
-                .signal(signal)
+                .likeSignal(likeSignal)
+                .blockSignal(blockSignal)
                 .build();
     }
 

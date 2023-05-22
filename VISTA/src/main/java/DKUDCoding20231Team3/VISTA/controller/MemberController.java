@@ -52,9 +52,16 @@ public class MemberController {
 
     @PutMapping("choice")
     public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
-                                                 @RequestParam("signal") Boolean signal,
+                                                 @RequestParam("likeSignal") Boolean likeSignal,
                                                  HttpServletRequest httpServletRequest) {
-        return ResponseEntity.status(memberService.choiceLike(toId, signal, httpServletRequest)).build();
+        return ResponseEntity.status(memberService.choiceLike(toId, likeSignal, httpServletRequest)).build();
+    }
+
+    @PutMapping("block")
+    public ResponseEntity<HttpStatus> choiceBlock(@RequestParam("toId") Long toId,
+                                                 @RequestParam("blockSignal") Boolean blockSignal,
+                                                 HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(memberService.choiceBlock(toId, blockSignal, httpServletRequest)).build();
     }
 
     @GetMapping("likes")
