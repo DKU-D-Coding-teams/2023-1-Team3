@@ -33,7 +33,7 @@ public class SignUpRequest {
     @NotBlank
     private String department;
 
-    @Pattern(regexp = "^\\w{0,100}$")
+    @Pattern(regexp = "^.{0,100}$")
     private String introduction;
 
 }
