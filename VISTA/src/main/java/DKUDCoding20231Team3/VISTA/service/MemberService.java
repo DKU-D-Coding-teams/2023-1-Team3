@@ -2,8 +2,10 @@ package DKUDCoding20231Team3.VISTA.service;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
+import DKUDCoding20231Team3.VISTA.domain.entity.SuggestRefresh;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
+import DKUDCoding20231Team3.VISTA.domain.repository.SuggestRefreshRepository;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
 import DKUDCoding20231Team3.VISTA.dto.response.*;
@@ -35,6 +37,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberLogRepository memberLogRepository;
+    private final SuggestRefreshRepository suggestRefreshRepository;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
     private final OCIUtil ociUtil;
@@ -87,37 +90,59 @@ public class MemberService {
     }
 
     public SuggestResponse suggest(HttpServletRequest httpServletRequest) {
-        final int SUGGEST_SIZE = 5;
+        final int SUGGEST_SIZE = 8;
 
         final Member member = findMemberByHttpServlet(httpServletRequest);
-        List<MemberInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
 
-        boolean endPageSignal = false;
+        SuggestRefresh suggestRefresh = suggestRefreshRepository.findByMemberId(member.getMemberId())
+                .orElse(SuggestRefresh.of(member.getMemberId(), false));
+        if(suggestRefresh.isRefreshSignal()) memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
+
         Random random = new Random();
         List<MemberResponse> memberResponses = new ArrayList<>();
+        List<MemberLog> memberLogs = new ArrayList<>();
+        List<MemberInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
+
+        if(suggestMembers.size() == 0) {
+            memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
+            suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
+            if(suggestMembers.size() == 0) return SuggestResponse.of(true, 0, memberResponses);
+        }
+
         for(int i = 0; i < SUGGEST_SIZE; i++) {
-            if (suggestMembers.size() == 0) {
-                memberLogRepository.deleteByFromId(member.getMemberId());
-                endPageSignal = true;
-                break;
-            }
+            if(suggestMembers.size() == 0) break;
+
             int randomIndex = random.nextInt(suggestMembers.size());
             MemberInterface randomMember = suggestMembers.get(randomIndex);
             suggestMembers.remove(randomMember);
-
-            memberLogRepository.save(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false));
+            memberLogs.add(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false, false));
             memberResponses.add(MemberResponse.of(randomMember));
         }
+        memberLogRepository.saveAll(memberLogs);
 
-        return SuggestResponse.of(endPageSignal, memberResponses);
+        suggestRefresh.setRefreshSignal(memberResponses.size() < SUGGEST_SIZE);
+        suggestRefreshRepository.save(suggestRefresh);
+
+        return SuggestResponse.of(false, memberResponses.size(), memberResponses);
     }
     
-    public HttpStatus choiceLike(Long toId, Boolean signal, HttpServletRequest httpServletRequest) {
+    public HttpStatus choiceLike(Long toId, Boolean likeSignal, HttpServletRequest httpServletRequest) {
         MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
                 findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
 
-        memberLog.setSignal(signal);
+        memberLog.setLikeSignal(likeSignal);
+        memberLogRepository.save(memberLog);
+
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus choiceBlock(Long toId, Boolean blockSignal, HttpServletRequest httpServletRequest) {
+        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
+                        findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
+
+        memberLog.setBlockSignal(blockSignal);
         memberLogRepository.save(memberLog);
 
         return HttpStatus.OK;
@@ -130,11 +155,9 @@ public class MemberService {
 
         boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
         List<MemberResponse> memberResponses = new ArrayList<>();
-        for(MemberInterface likeMember : likeMembers) {
-            memberResponses.add(MemberResponse.of(likeMember));
-        }
+        for(MemberInterface likeMember : likeMembers) memberResponses.add(MemberResponse.of(likeMember));
 
-        return LikeResponse.of(endPageSignal, memberResponses);
+        return LikeResponse.of(endPageSignal, memberResponses.size(), memberResponses);
     }
 
     public HttpStatus resetPassword(ResetPasswordRequest resetPasswordRequest, HttpServletRequest httpServletRequest) {

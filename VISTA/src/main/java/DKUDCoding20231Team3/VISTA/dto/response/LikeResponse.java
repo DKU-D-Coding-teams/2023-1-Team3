@@ -13,11 +13,14 @@ public class LikeResponse {
 
     private boolean endPageSignal;
 
+    private int count;
+
     private List<MemberResponse> memberResponses;
 
-    public static LikeResponse of(boolean endPageSignal, List<MemberResponse> memberResponses) {
-        return builder()
+    public static LikeResponse of(boolean endPageSignal, int count, List<MemberResponse> memberResponses) {
+        return LikeResponse.builder()
                 .endPageSignal(endPageSignal)
+                .count(count)
                 .memberResponses(memberResponses).build();
     }
 

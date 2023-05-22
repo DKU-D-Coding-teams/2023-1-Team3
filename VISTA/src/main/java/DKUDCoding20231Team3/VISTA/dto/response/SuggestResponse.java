@@ -13,13 +13,15 @@ public class SuggestResponse {
 
     private boolean endPageSignal;
 
+    private int count;
+
     private List<MemberResponse> memberResponses;
 
-    public static SuggestResponse of(boolean endPageSignal, List<MemberResponse> memberResponses) {
+    public static SuggestResponse of(boolean endPageSignal, int count, List<MemberResponse> memberResponses) {
         return SuggestResponse.builder()
                 .endPageSignal(endPageSignal)
-                .memberResponses(memberResponses)
-                .build();
+                .count(count)
+                .memberResponses(memberResponses).build();
     }
 
 }
