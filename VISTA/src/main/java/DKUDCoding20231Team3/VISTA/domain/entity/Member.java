@@ -46,6 +46,7 @@ package DKUDCoding20231Team3.VISTA.domain.entity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,7 +70,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class Member implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(name = "member_id")
     private Long memberId;
 
@@ -84,9 +85,18 @@ public class Member implements UserDetails {
 
     private LocalDate birth;
 
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @Builder.Default
+//    private List<String> roles = new ArrayList<>();
+
+//    @Transient
+//    private Collection<SimpleGrantedAuthority> authorities;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
+
+    private String refreshToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -104,6 +114,8 @@ public class Member implements UserDetails {
     public String getPassword() {
         return password;
     }
+
+//    public Role getRole() { return role; }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -126,12 +138,16 @@ public class Member implements UserDetails {
     }
 
     public static Member of(SignUpRequest signUpRequest) {
+        ArrayList<String> roles =  new ArrayList<>();
+        roles.add("MEMBER");
+
         return Member.builder()
                 .mail(signUpRequest.getMail())
                 .password(signUpRequest.getPassword())
                 .name(signUpRequest.getName())
                 .gender(signUpRequest.getGender())
                 .birth(signUpRequest.getBirth())
+                .roles(roles)
                 .build();
     }
 }

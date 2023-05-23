@@ -8,12 +8,10 @@ import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.*;
 import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
-import DKUDCoding20231Team3.VISTA.util.JwtUtil.Jwt;
-import DKUDCoding20231Team3.VISTA.util.JwtUtil.JwtAuthenticationFilter;
-import DKUDCoding20231Team3.VISTA.util.JwtUtil.JwtProvider;
+import DKUDCoding20231Team3.VISTA.util.JwtUtil;
+//import DKUDCoding20231Team3.VISTA.FilesUsedBefore.JwtProvider;
 import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +19,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,16 +35,18 @@ import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 @Service
 //@Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final MemberLogRepository memberLogRepository;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
-    private final JwtProvider jwtProvider;
+//    private final JwtProvider jwtProvider;
+    private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     public HttpStatus sendMail(MailRequest mailRequest) {
+        System.out.println("in sendMail - mailRequest: " + mailRequest);
         if (memberRepository.existsByMail(mailRequest.getMail())) throw new VistaException(ALREADY_SAVED_MEMBER);
 
         final String code = mailUtil.codeSend(mailRequest.getMail());
@@ -89,25 +93,53 @@ public class MemberService {
 
     @Transactional
     public SignInResponse signIn(String memberMail, String memberPassword) {
+        // 아이디 검사
+        Member member = memberRepository.findMemberByMail(memberMail).orElseThrow(
+                () -> new RuntimeException("Not found Member")
+        );
 
-//        final Member member = memberRepository.findByMail(signInRequest.getMail())
-//        .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+//        // 비밀번호 검사
+//        if(!passwordEncoder.matches(memberPassword, member.getPassword())) {
+//            throw new RuntimeException("Not matches Password");
+//        }
+
+        if (!member.getPassword().equals(memberPassword)) {
+            throw new RuntimeException("Not mathces Password");
+        }
+
+
+
+        // 아이디 정보로 Token생성
+//        TokenDto tokenDto = jwtUtil.createAllToken(loginReqDto.getNickname());
+        String accessToken = jwtUtil.generateAccessToken(memberMail);
+        String refreshToken = jwtUtil.generateRefreshToken(memberMail);
+
+        // Refresh토큰 있는지 확인
+        if (memberRepository.findRefreshTokenByMail(memberMail) != null) {
+            memberRepository.saveRefreshTokenByMail(memberMail, refreshToken);
+            return SignInResponse.of(accessToken, refreshToken);
+        } else {
+            memberRepository.saveRefreshTokenByMail(memberMail, jwtUtil.generateAccessToken(memberMail));
+        }
+
+//        return new GlobalResDto("Success Login", HttpStatus.OK.value());
+
+
+//        // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
+//        // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
+//        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberMail, memberPassword);
 //
-//        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword()))
-//            throw new VistaException(INVALID_PASSWORD);
-
-        // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
-        // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberMail, memberPassword);
-
-        // 2. 실제 검증 (사용자 비밀번호 체크)이 이루어지는 부분
-        // authenticate 매서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
-        // 3. 인증 정보를 기반으로 JWT 토큰 생성
-        Jwt jwt = jwtProvider.generateToken(authentication);
-
-        return SignInResponse.of(jwt);
+//        // 2. 실제 검증 (사용자 비밀번호 체크)이 이루어지는 부분
+//        // authenticate 매서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행
+//        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+//
+//        // 3. 인증 정보를 기반으로 JWT 토큰 생성
+////        Jwt jwt = jwtProvider.generateToken(authentication);
+////        memberRepository.saveRefreshTokenByMail(memberMail, jwt.getRefreshToken());
+//
+//
+////        return SignInResponse.of(jwt);
+        return SignInResponse.of(accessToken, refreshToken);
     }
 
     @Transactional
@@ -123,7 +155,7 @@ public class MemberService {
         for(int i = 0; i < SUGGEST_SIZE; i++) {
             if (suggestMembers.size() == 0) {
 //                memberLogRepository.deleteByFromId(member.getMemberId());
-                memberLogRepository.deleteByFromIdAndSignalIsTrue(member.getMemberId());
+//                memberLogRepository.deleteByFromIdAndSignalIsFalse(member.getMemberId());
                 endPageSignal = true;
                 break;
             }
@@ -182,6 +214,22 @@ public class MemberService {
         memberRepository.save(member);
 
         return HttpStatus.OK;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return memberRepository.findMemberByMail(username)
+                .map(this::createUserDetails)
+                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
+    }
+
+    // 해당하는 User 의 데이터가 존재한다면 UserDetails 객체로 만들어서 리턴
+    private UserDetails createUserDetails(Member member) {
+        return User.builder()
+                .username(member.getUsername())
+                .password(passwordEncoder.encode(member.getPassword()))
+                .roles(member.getRoles().toArray(new String[0]))
+                .build();
     }
 
 //    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {

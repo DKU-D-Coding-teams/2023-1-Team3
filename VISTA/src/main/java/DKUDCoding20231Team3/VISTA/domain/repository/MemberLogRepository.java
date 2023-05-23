@@ -18,7 +18,7 @@ public interface MemberLogRepository extends JpaRepository<MemberLog, Long> {
     void deleteByFromId(Long fromId);
 
 //    @Query(value = "select m.memberId as memberId, m.name as name, m.gender as gender, m.birth as birth from Member as m where m.memberId <> ?1 and m.gender <> ?2 and m.memberId not in (select toId from MemberLog where fromId = ?1)")
-    void deleteByFromIdAndSignalIsTrue(Long fromId);
+    void deleteByFromIdAndSignalIsFalse(Long fromId);
 
     Optional<MemberLog> findByFromIdAndToId(Long fromId, Long toId);
 
