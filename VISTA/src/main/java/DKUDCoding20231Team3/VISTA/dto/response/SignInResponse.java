@@ -11,20 +11,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class SignInResponse {
 
-//    private String grantType;
-//
-//    private String accessToken;
-//
-//    private String refreshToken;
-//
-//    public static SignInResponse of(Jwt jwt) {
-//        return SignInResponse.builder()
-//                .grantType(jwt.getGrantType())
-//                .accessToken(jwt.getAccessToken())
-//                .refreshToken(jwt.getRefreshToken())
-//                .build();
-//    }
-//
     private String accessToken;
 
     private String refreshToken;

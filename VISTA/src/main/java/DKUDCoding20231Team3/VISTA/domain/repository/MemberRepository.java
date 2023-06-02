@@ -3,6 +3,7 @@ package DKUDCoding20231Team3.VISTA.domain.repository;
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberListInterface;
+import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +25,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     String findRefreshTokenByMail(String mail);
 
 //    @Query("UPDATE Question q set q.showCount = q.showCount + 1 where q.questionId = :questionId")
+    @Transactional
     @Modifying
     @Query(value = "update Member as m set m.refreshToken = ?2 where m.mail = ?1")
     void saveRefreshTokenByMail(String mail, String refreshToken);

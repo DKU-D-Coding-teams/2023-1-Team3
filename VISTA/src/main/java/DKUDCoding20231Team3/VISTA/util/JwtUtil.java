@@ -1,5 +1,9 @@
 package DKUDCoding20231Team3.VISTA.util;
 
+import DKUDCoding20231Team3.VISTA.domain.entity.Member;
+import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
+import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
+import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -10,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -20,84 +26,93 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.NOT_FOUND_MEMBER;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    public static final long MINUTE = 1000 * 60;
+    public static final long SECOND = 1000;
+    public static final long MINUTE = SECOND * 60;
     public static final long HOUR = 60 * MINUTE;
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
     public static final long AT_EXP_TIME =  1 * MINUTE;
-    public static final long RT_EXP_TIME =  10 * MINUTE;
+    public static final long RT_EXP_TIME =  30 * MINUTE;
 
     // Header
     public static final String AT_HEADER = "access_token";
     public static final String RT_HEADER = "refresh_token";
     public static final String TOKEN_HEADER_PREFIX = "Bearer ";
     private final Key secretKey;
-    private final String encodedKey;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-    // Expiration Time
+    private final MemberRepository memberRepository;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Autowired
-    public JwtUtil(@Value("${spring.jwt.secret}") String secretKey) {
+    public JwtUtil(@Value("${spring.jwt.secret}") String secretKey, MemberRepository memberRepository, AuthenticationManagerBuilder authenticationManagerBuilder) {
         byte[] keyBytes = Decoders.BASE64.decode((secretKey));
-        this.encodedKey = secretKey;
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        this.memberRepository = memberRepository;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
-//    public String generateAccessToken(Authentication authentication) {
-//        Date date = new Date();
-//
-//        return Jwts.builder()
-//                .setSubject(authentication.getName())
-//                .setExpiration(new Date(date.getTime() + ACCESS_TIME))
-//                .setIssuedAt(date)
-//                .signWith(secretKey, signatureAlgorithm)
-//                .compact();
-//    }
-//    public String generateRefreshToken(Authentication authentication) {
-//        Date date = new Date();
-//
-//        return Jwts.builder()
-//                .setSubject(authentication.getName())
-//                .setExpiration(new Date(date.getTime() + REFRESH_TIME))
-//                .signWith(secretKey, SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-
-    public String generateAccessToken(String memberMail) {
-        Date date = new Date();
+    public String generateAccessToken(Authentication authentication) {
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         return Jwts.builder()
-                .setSubject(memberMail)
-                .setExpiration(new Date(date.getTime() + AT_EXP_TIME))
-                .setIssuedAt(date)
+                .setSubject(authentication.getName())
+                .setExpiration(new Date(System.currentTimeMillis() + AT_EXP_TIME))
+                .claim("roles", authorities)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .signWith(secretKey, signatureAlgorithm)
                 .compact();
     }
-    public String generateRefreshToken(String memberMail) {
-        Date date = new Date();
-
+    public String generateRefreshToken(Authentication authentication) {
         return Jwts.builder()
-                .setSubject(memberMail)
-                .setExpiration(new Date(date.getTime() + AT_EXP_TIME))
+                .setSubject(authentication.getName())
+                .setExpiration(new Date(System.currentTimeMillis() + RT_EXP_TIME))
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // 인증 객체 생성
-//    public Authentication generateAuthentication(String mail) {
-//        UserDetails userDetails = memberService.loadUserByUsername(mail);
-//        // spring security 내에서 가지고 있는 객체입니다. (UsernamePasswordAuthenticationToken)
-//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-//    }
+    public String regenerateAccessToken(String refreshToken) {
+        String mail = getMailFromToken(refreshToken);
+        final Member member = memberRepository.findMemberByMail(mail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
+
+        return generateAccessToken(authentication);
+    }
+
+    public String regenerateRefreshToken(String refreshToken) {
+        String mail = getMailFromToken(refreshToken);
+        final Member member = memberRepository.findMemberByMail(mail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
+
+        return generateRefreshToken(authentication);
+    }
+
+    public SignInResponse regenerateTokens(String refreshToken) {
+        String mail = getMailFromToken(refreshToken);
+        final Member member = memberRepository.findMemberByMail(mail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
+        String newAccessToken = generateAccessToken(authentication);
+        String newRefreshToken = generateRefreshToken(authentication);
+
+        return SignInResponse.of(newAccessToken, newRefreshToken);
+    }
 
     private Claims parseClaims(String Token) {
-        System.out.println("JwtProvider method parseClaims - Token: " + Token);
-
         try {
             return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(Token).getBody();
         } catch (ExpiredJwtException e) {
@@ -105,31 +120,23 @@ public class JwtUtil {
         }
     }
 
-//    public Authentication generateAuthentication(String accessToken) {
-    public UsernamePasswordAuthenticationToken generateAuthentication(String accessToken) {
+    public UsernamePasswordAuthenticationToken getAuthentication(String token) {
 
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(token);
 
-//        if (claims.get("auth") == null) {
-//            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-//        }
-
-        // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
+                Arrays.stream(claims.get("roles").toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-//        // UserDetails 객체를 만들어서 Authentication 리턴
-//        UserDetails userDetails = new User(claims.getSubject(), "", authorities);
-
-//        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
-
         return new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
+    }
 
-//        UserDetails userDetails = memberService.loadUserByUsername(mail);
-//        // spring security 내에서 가지고 있는 객체입니다. (UsernamePasswordAuthenticationToken)
-//        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    public Authentication generateAuthentication(String mail, String password) {
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(mail, password);
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
+
+        return authentication;
     }
 
     public Boolean validateToken(String Token) {
@@ -148,46 +155,69 @@ public class JwtUtil {
         return false;
     }
 
+    public Boolean validateAccessToken(String accessToken) {
+        try {
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken);
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT AccessToken", e);
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("Invalid JWT Token", e);
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT Token", e);
+        } catch (IllegalArgumentException e) {
+            log.info("JWT claims string is empty.", e);
+        }
 
+        return false;
+    }
 
-//    // refreshToken 토큰 검증
-//    // db에 저장되어 있는 token과 비교
-//    // db에 저장한다는 것이 jwt token을 사용한다는 강점을 상쇄시킨다.
-//    // db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재합니다.)
-//    public Boolean refreshTokenValidation(String token) {
-//
-//        // 1차 토큰 검증
-//        if(!tokenValidation(token)) return false;
-//
-//        // DB에 저장한 토큰 비교
-//        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByAccountNickname(getEmailFromToken(token));
-//
-//        return refreshToken.isPresent() && token.equals(refreshToken.get().getRefreshToken());
-//    }
+    public Boolean validateRefreshToken(String refreshToken) {
+        try {
+            memberRepository.findRefreshTokenByMail(Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject());
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT RefreshToken", e);
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("Invalid JWT Token", e);
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT Token", e);
+        } catch (IllegalArgumentException e) {
+            log.info("JWT claims string is empty.", e);
+        }
+
+        return false;
+    }
 
     public String getMailFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    // header 토큰을 가져오는 기능
+    public String getTokenFromHeader(HttpServletRequest request) {
+        return request.getHeader("Authorization").substring(TOKEN_HEADER_PREFIX.length());
+    }
+
     public String getAccessTokenFromHeader(HttpServletRequest request) {
-        System.out.println("JwtAuthenticationFilter method getAccessTokenFromHeader - request.getHeader(ACEESS_TOKEN): " + request.getHeader(AT_HEADER));
         return request.getHeader(AT_HEADER);
     }
 
     public String getRefreshTokenFromHeader(HttpServletRequest request) {
-        System.out.println("JwtAuthenticationFilter method getRefreshTokenFromHeader - request.getHeader(REFRESH_TOKEN): " + request.getHeader(RT_HEADER));
         return request.getHeader(RT_HEADER);
     }
 
-
-    // 어세스 토큰 헤더 설정
     public void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
         response.setHeader(AT_HEADER, accessToken);
     }
 
-    // 리프레시 토큰 헤더 설정
     public void setRefreshTokenToHeader(HttpServletResponse response, String refreshToken) {
+        response.setHeader(RT_HEADER, refreshToken);
+    }
+
+    public void setAccessTokenToBody(HttpServletResponse response, String accessToken) {
+        response.setHeader(AT_HEADER, accessToken);
+    }
+
+    public void setRefreshTokenToBody(HttpServletResponse response, String refreshToken) {
         response.setHeader(RT_HEADER, refreshToken);
     }
 

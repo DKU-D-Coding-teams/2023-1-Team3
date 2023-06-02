@@ -10,17 +10,18 @@ import DKUDCoding20231Team3.VISTA.dto.response.SuggestResponse;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
 import DKUDCoding20231Team3.VISTA.util.JwtUtil;
-//import DKUDCoding20231Team3.VISTA.FilesUsedBefore.JwtAuthenticationFilterBefore;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.INVALID_REQUEST_TOKEN;
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.INVALID_PASSWORD;
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.NOT_FOUND_MEMBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final JwtProvider jwtProvider;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/mail")
@@ -67,72 +67,93 @@ public class MemberController {
     }
 
     @GetMapping("/suggest")
-    public ResponseEntity<SuggestResponse> suggest(HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
-//        return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(httpServletRequest));
+    public ResponseEntity suggest(HttpServletRequest httpServletRequest) {
+        String requestedAccessToken = httpServletRequest.getHeader("Access_Token");
+        String requestedRefreshToken = httpServletRequest.getHeader("Refresh_Token");
+
+        if (requestedAccessToken == null && requestedRefreshToken != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(memberService.regenerateTokens(requestedRefreshToken));
+        }
+
+        Member member = memberRepository.findMemberByMail((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(member));
     }
 
     @PutMapping("/choice")
-    public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
+    public ResponseEntity choiceLike(@RequestParam("toId") Long toId,
                                                  @RequestParam("signal") Boolean signal,
                                                  HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+        String requestedAccessToken = httpServletRequest.getHeader("Access_Token");
+        String requestedRefreshToken = httpServletRequest.getHeader("Refresh_Token");
+
+        if (requestedAccessToken == null && requestedRefreshToken != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(memberService.regenerateTokens(requestedRefreshToken));
+        }
+
+        Member member = findMemberByHttpServletAccessToken(httpServletRequest);
         return ResponseEntity.status(memberService.choiceLike(toId, signal, member)).build();
     }
 
     @GetMapping("/likes")
-    public ResponseEntity<LikeResponse> getLikes(@RequestParam("page") Integer page,
+    public ResponseEntity getLikes(@RequestParam("page") Integer page,
                                                  HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+        String requestedAccessToken = httpServletRequest.getHeader("Access_Token");
+        String requestedRefreshToken = httpServletRequest.getHeader("Refresh_Token");
+
+        if (requestedAccessToken == null && requestedRefreshToken != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(memberService.regenerateTokens(requestedRefreshToken));
+        }
+
+        Member member = findMemberByHttpServletAccessToken(httpServletRequest);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getLikes(page, member));
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<HttpStatus> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest,
+    public ResponseEntity resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest,
                                                     HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+        String requestedAccessToken = httpServletRequest.getHeader("Access_Token");
+        String requestedRefreshToken = httpServletRequest.getHeader("Refresh_Token");
+
+        if (requestedAccessToken == null && requestedRefreshToken != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(memberService.regenerateTokens(requestedRefreshToken));
+        }
+
+        Member member = findMemberByHttpServletAccessToken(httpServletRequest);
         return ResponseEntity.status(memberService.resetPassword(resetPasswordRequest, member)).build();
     }
 
-//    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
-//        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider);
-//        final String token = jwtAuthenticationFilter.resolveToken(httpServletRequest);
-//
-////        if (token != null && token.startsWith("Bearer ")) {
-////            String jwt = token.substring(7);
-//        if (token != null) {
-////                String jwt = token.substring(7);
-//            if (jwtProvider.validateToken(token)) {
-//                return memberRepository.findMemberByMail(jwtProvider.getMemberMail(token))
-//                        .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-//            }
-//            else
-//                throw new VistaException(INVALID_ACCESS_TOKEN);
-//        } else {
-//            throw new VistaException(INVALID_REQUEST_TOKEN);
-//        }
-//    }
-
-    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
-//        JwtAuthenticationFilterBefore jwtAuthenticationFilter = new JwtAuthenticationFilterBefore(jwtUtil);
-//        final String token = jwtAuthenticationFilter.resolveToken(httpServletRequest);
+    private Member findMemberByHttpServletAccessToken(HttpServletRequest httpServletRequest) {
         final String accessToken = jwtUtil.getAccessTokenFromHeader(httpServletRequest);
 
-//        if (token != null && token.startsWith("Bearer ")) {
-//            String jwt = token.substring(7);
-        if (accessToken != null) {
-//                String jwt = token.substring(7);
-            if (jwtUtil.validateToken(accessToken)) {
-                return memberRepository.findMemberByMail(jwtUtil.getMailFromToken(accessToken))
-                        .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            }
-            else
-                throw new VistaException(INVALID_ACCESS_TOKEN);
-        } else {
-            throw new VistaException(INVALID_REQUEST_TOKEN);
-        }
+        return memberRepository.findMemberByMail(jwtUtil.getMailFromToken(accessToken))
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
     }
 
+    private Member findMemberByHttpServletRefreshToken(HttpServletRequest httpServletRequest) {
+        final String refreshToken = jwtUtil.getRefreshTokenFromHeader(httpServletRequest);
+
+        return memberRepository.findMemberByMail(jwtUtil.getMailFromToken(refreshToken))
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+    }
+
+    private Member findMemberByAuthentication(Authentication authentication) {
+        String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("MemberController method findMemberByAuthentication - memberMail: " + memberMail);
+
+        return memberRepository.findMemberByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+    }
+
+//    private ResponseEntity regenerateTokens(String requestedRefreshToken) {
+//        String mail = jwtUtil.getMailFromToken(requestedRefreshToken);
+//        final Member member = memberRepository.findMemberByMail(mail)
+//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+//        Authentication authentication = jwtUtil.generateAuthentication(member.getMail(), member.getPassword());
+//        String newAccessToken = jwtUtil.generateAccessToken(authentication);
+//        String newRefreshToken = jwtUtil.generateRefreshToken(authentication);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(SignInResponse.of(newAccessToken, newRefreshToken));
+//    }
 }
