@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import ProfileUpload from "./profileUpload/ProfileUpload";
 import { useDispatch, useSelector } from "react-redux";
 import {
   onImageLoad,
@@ -11,6 +10,8 @@ import imageCompression from "browser-image-compression";
 
 import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
 import { profileEditAction } from "../../../actions/securityEditAction";
+import SettingHeader from "../../../components/SettingHeader";
+import Crop from "./profileUpload/Crop";
 const ProfileEditScreen = () => {
   const dispatch = useDispatch();
   const [imgSrc, setImgSrc] = useState("");
@@ -38,7 +39,6 @@ const ProfileEditScreen = () => {
 
     reader.readAsDataURL(e.target.files[0]);
   };
-  console.log(completedCrop);
 
   const sendImageToServer = () => {
     const croppedImage = cropImageHandler(completedCrop, canvasRef, imgRef);
@@ -56,7 +56,18 @@ const ProfileEditScreen = () => {
       useWebWorker: true,
     };
     try {
+      console.log("originalFile instanceof Blob", imgFile instanceof Blob); // true
+      console.log(`originalFile size ${imgFile.size / 1024 / 1024} MB`);
+
       const compressedFile = await imageCompression(imgFile, options);
+      console.log(
+        "compressedFile instanceof Blob",
+        compressedFile instanceof Blob
+      ); // true
+      console.log(
+        `compressedFile size ${compressedFile.size / 1024 / 1024} MB`
+      ); // smaller than maxSizeMB
+
       dispatch(profileEditAction(compressedFile));
       //compressedFiled을 store할 수 없음.. 왜?
     } catch (error) {
@@ -65,26 +76,14 @@ const ProfileEditScreen = () => {
   };
 
   return (
-    <section className="profileEdit">
-      <div className="profileEdit__top center">
-        <Link to="/setting">
-          <box-icon name="arrow-back" color="rgb(196, 196, 196)"></box-icon>
-          <span>Setting</span>
-        </Link>
-        <span className="profileEdit__top__center center">프로필 설정</span>
-        <button
-          className="profileEdit__top__checked"
-          onClick={sendImageToServer}
-        >
-          <box-icon
-            name="check"
-            color="rgb(196, 196, 196)"
-            size="2.3rem"
-          ></box-icon>
-        </button>
-      </div>
+    <section className="profileEdit default-layout">
+      <SettingHeader sendImageToServer={sendImageToServer} />
+      <button
+        style={{ width: "3rem", height: "3rem" }}
+        onClick={sendImageToServer}
+      ></button>
+      <Crop readFileImage={getImageHandler} />
 
-      <ProfileUpload readFileImage={getImageHandler} />
       {!!imgSrc && (
         <ReactCrop
           crop={crop}
