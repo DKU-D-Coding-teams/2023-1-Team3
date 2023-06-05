@@ -181,6 +181,18 @@ public class MemberService {
         return MemberResponse.of(member);
     }
 
+    public MemberResponse getMyPages(HttpServletRequest httpServletRequest) {
+        return MemberResponse.of(findMemberByHttpServlet(httpServletRequest));
+    }
+
+    public MemberResponse updateMyPages(MyPageRequest myPageRequest, HttpServletRequest httpServletRequest) {
+        Member member = findMemberByHttpServlet(httpServletRequest);
+        member.update(myPageRequest);
+        memberRepository.save(member);
+
+        return MemberResponse.of(member);
+    }
+
     private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
         final String token = jwtTokenProvider.resolveToken(httpServletRequest);
 
