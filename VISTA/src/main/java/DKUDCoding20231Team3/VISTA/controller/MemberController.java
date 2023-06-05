@@ -83,4 +83,15 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.uploadImage(image, httpServletRequest));
     }
 
+    @GetMapping("mypages")
+    public ResponseEntity<MemberResponse> getMyPages(HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMyPages(httpServletRequest));
+    }
+
+    @PostMapping("mypages")
+    public ResponseEntity<MemberResponse> updateMyPages(@Valid @RequestBody MyPageRequest myPageRequest,
+                                                      HttpServletRequest httpServletRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.updateMyPages(myPageRequest, httpServletRequest));
+    }
+
 }

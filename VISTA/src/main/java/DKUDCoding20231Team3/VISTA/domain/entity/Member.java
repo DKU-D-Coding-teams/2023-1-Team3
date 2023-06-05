@@ -51,4 +51,12 @@ public class Member {
                 .build();
     }
 
+    public void update(MyPageRequest myPageRequest) {
+        this.name = myPageRequest.getName();
+        this.gender = myPageRequest.getGender();
+        this.birth = myPageRequest.getBirth();
+        this.department = myPageRequest.getDepartment();
+        this.introduction = myPageRequest.getIntroduction();
+    }
+
 }
