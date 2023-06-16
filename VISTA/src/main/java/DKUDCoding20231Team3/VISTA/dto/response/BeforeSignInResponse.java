@@ -10,16 +10,19 @@ import lombok.NonNull;
 @Builder
 @NonNull
 @AllArgsConstructor
-public class SignInResponse {
+public class BeforeSignInResponse {
+
+    private String grantType;
 
     private String accessToken;
 
     private String refreshToken;
 
-    public static SignInResponse of(String accessToken, String refreshToken) {
-        return SignInResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+    public static BeforeSignInResponse of(JwtToken jwtToken) {
+        return BeforeSignInResponse.builder()
+                .grantType(jwtToken.getGrantType())
+                .accessToken(jwtToken.getAccessToken())
+                .refreshToken(jwtToken.getRefreshToken())
                 .build();
     }
 
