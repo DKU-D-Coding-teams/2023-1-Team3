@@ -20,6 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +38,7 @@ import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
     private final MemberLogRepository memberLogRepository;
@@ -98,26 +102,15 @@ public class MemberService {
     }
 
     public SignInResponse signIn(String requestedMemberMail, String requestedMemberPassword) {
-        System.out.println("MemberService method signIn - checking out signIn API 3");
         final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-        System.out.println("MemberService method signIn - member: " + member);
 
         if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
-        System.out.println("MemberService method signIn - check point 1");
 
         Authentication authentication = jwtUtil.generateAuthentication(member.getMail(), member.getPassword());
-        System.out.println("MemberService method signIn - check point 2");
         String accessToken = jwtUtil.generateAccessToken(authentication);
-        System.out.println("MemberService method signIn - check point 3");
         String refreshToken = jwtUtil.generateRefreshToken(authentication);
-
-        System.out.println("MemberService method signIn - authentication: " + authentication);
-        System.out.println("MemberService method signIn - accessToken: " + accessToken);
-        System.out.println("MemberService method signIn - refreshToken: " + refreshToken);
-        System.out.println("MemberService method signIn - member: " + member);
-
 
         return SignInResponse.of(accessToken, refreshToken);
     }
@@ -334,6 +327,22 @@ public class MemberService {
         memberRepository.save(member);
 
         return MemberResponse.of(member);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return memberRepository.findByMail(username)
+                .map(this::createUserDetails)
+                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
+    }
+
+    // 해당하는 User 의 데이터가 존재한다면 UserDetails 객체로 만들어서 리턴
+    private UserDetails createUserDetails(Member member) {
+        return User.builder()
+                .username(member.getUsername())
+                .password(passwordEncoder.encode(member.getPassword()))
+                .roles(member.getRoles().toArray(new String[0]))
+                .build();
     }
 
 //    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {

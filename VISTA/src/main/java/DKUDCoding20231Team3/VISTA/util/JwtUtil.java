@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -38,13 +39,12 @@ public class JwtUtil {
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
-    public static final long AT_EXP_TIME =  1 * MINUTE;
+    public static final long AT_EXP_TIME =  2 * MINUTE;
     public static final long RT_EXP_TIME =  30 * MINUTE;
 
     // Header
     public static final String AT_HEADER = "access_token";
     public static final String RT_HEADER = "refresh_token";
-    public static final String TOKEN_HEADER_PREFIX = "Bearer ";
     private final Key secretKey;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final MemberRepository memberRepository;
@@ -135,14 +135,8 @@ public class JwtUtil {
     }
 
     public Authentication generateAuthentication(String mail, String password) {
-        System.out.println("JwtUtil method generateAuthentication - check point 1");
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(mail, password);
-        System.out.println("JwtUtil method generateAuthentication - check point 2");
-        System.out.println("JwtUtil method generateAuthentication - authenticationManagerBuilder: " + authenticationManagerBuilder);
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
-        System.out.println("JwtUtil method generateAuthentication - check point 3");
-        System.out.println("JwtUtil method generateAuthentication - authentication: " + authentication);
-
         return authentication;
     }
 
@@ -203,10 +197,6 @@ public class JwtUtil {
 
     public String getMailFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public String getTokenFromHeader(HttpServletRequest request) {
-        return request.getHeader("Authorization").substring(TOKEN_HEADER_PREFIX.length());
     }
 
     public String getAccessTokenFromHeader(HttpServletRequest request) {
