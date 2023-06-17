@@ -135,8 +135,13 @@ public class JwtUtil {
     }
 
     public Authentication generateAuthentication(String mail, String password) {
+        System.out.println("JwtUtil method generateAuthentication - check point 1");
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(mail, password);
+        System.out.println("JwtUtil method generateAuthentication - check point 2");
+        System.out.println("JwtUtil method generateAuthentication - authenticationManagerBuilder: " + authenticationManagerBuilder);
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
+        System.out.println("JwtUtil method generateAuthentication - check point 3");
+        System.out.println("JwtUtil method generateAuthentication - authentication: " + authentication);
 
         return authentication;
     }

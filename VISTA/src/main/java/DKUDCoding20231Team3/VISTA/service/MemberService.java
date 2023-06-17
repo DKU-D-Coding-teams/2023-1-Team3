@@ -98,15 +98,26 @@ public class MemberService {
     }
 
     public SignInResponse signIn(String requestedMemberMail, String requestedMemberPassword) {
+        System.out.println("MemberService method signIn - checking out signIn API 3");
         final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+        System.out.println("MemberService method signIn - member: " + member);
 
         if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
+        System.out.println("MemberService method signIn - check point 1");
 
         Authentication authentication = jwtUtil.generateAuthentication(member.getMail(), member.getPassword());
+        System.out.println("MemberService method signIn - check point 2");
         String accessToken = jwtUtil.generateAccessToken(authentication);
+        System.out.println("MemberService method signIn - check point 3");
         String refreshToken = jwtUtil.generateRefreshToken(authentication);
+
+        System.out.println("MemberService method signIn - authentication: " + authentication);
+        System.out.println("MemberService method signIn - accessToken: " + accessToken);
+        System.out.println("MemberService method signIn - refreshToken: " + refreshToken);
+        System.out.println("MemberService method signIn - member: " + member);
+
 
         return SignInResponse.of(accessToken, refreshToken);
     }

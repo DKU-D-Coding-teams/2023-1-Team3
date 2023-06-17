@@ -57,8 +57,12 @@ public class MemberController {
 
     @PostMapping("signin")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+        System.out.println("MemberController method signIn - checking out signIn API 2");
         String memberMail = signInRequest.getMail();
         String memberPassword = signInRequest.getPassword();
+
+        System.out.println("MemberController method signIn - memberMail: " + memberMail);
+        System.out.println("MemberController method signIn - memberPassword: " + memberPassword);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signIn(memberMail, memberPassword));
     }
