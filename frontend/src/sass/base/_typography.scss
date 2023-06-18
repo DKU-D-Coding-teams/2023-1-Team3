@@ -1,0 +1,105 @@
+html {
+  @include respond(smartphones-port) {
+    //320px
+    font-size: 100%; //1rem = 16px 16/16*100 =100
+  }
+  @include respond(smartphones-land) {
+    //480px
+
+    font-size: 100%; //1rem = 16px 16/16*100 =100
+  }
+
+  @include respond(tab-port) {
+    //600px
+    font-size: 106.25%; //1rem = 17px 17/16*100 = 106.25
+  }
+  @include respond(tab-land) {
+    //801px
+    font-size: 118.75%; //1rem = 19px 19/16*100 = 118.75
+  }
+
+  @include respond(small-desktop) {
+    //1025px
+    font-size: 118.75%; ///1rem = 19px 19/16*100 = 118.75
+  }
+
+  @include respond(big-desktop) {
+    //1281
+    font-size: 118.75%; ///1rem = 19px 19/16*100 = 118.75
+  }
+}
+body {
+  display: block;
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+
+  @include respond(tab-port) {
+    display: flex;
+    justify-content: center;
+  }
+
+  @include respond(tab-land) {
+    display: flex;
+    justify-content: center;
+  }
+  @include respond(small-desktop) {
+    display: flex;
+    justify-content: center;
+  }
+
+  @include respond(big-desktop) {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  position: relative;
+  flex-direction: column;
+  @include respond(smartphones-port) {
+    min-width: 320px;
+    max-width: 479px;
+  }
+  @include respond(smartphones-land) {
+    min-width: 480px;
+    max-width: 599px;
+  }
+
+  @include respond(tab-port) {
+    width: 599px;
+    height: 100%;
+    -webkit-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    -moz-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+  }
+
+  @include respond(tab-land) {
+    width: 599px;
+    height: 100%;
+
+    -webkit-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    -moz-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+  }
+  @include respond(small-desktop) {
+    width: 599px;
+    height: 100%;
+    -webkit-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    -moz-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+  }
+
+  @include respond(big-desktop) {
+    width: 599px;
+    height: 100%;
+    -webkit-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    -moz-box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+    box-shadow: 0px 0px 19px 4px rgba(209, 209, 209, 1);
+  }
+}
