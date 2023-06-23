@@ -12,12 +12,16 @@ function setConnected(connected) {
 }
 
 function connect() {
+    console.log("function connect() - checkpoint 1");
     var socket = new SockJS('/chat');
     var memberId = 1;
     var headers = { 'memberId' : memberId };
+    console.log("function connect() - checkpoint 2");
 
     stompClient = Stomp.over(socket);
+    console.log("function connect() - checkpoint 3");
     stompClient.connect({}, function (frame) {
+        console.log("function connect() - checkpoint 4");
         setConnected(true);
         console.log('Connected: ' + frame);
     });

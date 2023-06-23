@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -27,6 +26,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.EXPIRED_JWT;
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.NOT_FOUND_MEMBER;
 
 @Slf4j
@@ -39,8 +39,8 @@ public class JwtUtil {
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
-    public static final long AT_EXP_TIME =  2 * MINUTE;
-    public static final long RT_EXP_TIME =  30 * MINUTE;
+    public static final long AT_EXP_TIME =  1 * MINUTE;
+    public static final long RT_EXP_TIME =  1 * MINUTE;
 
     // Header
     public static final String AT_HEADER = "access_token";
@@ -146,6 +146,7 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT AccessToken", e);
+            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {
@@ -162,6 +163,7 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT AccessToken", e);
+            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {
@@ -178,10 +180,11 @@ public class JwtUtil {
             String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
             Member member = memberRepository.findByMail(memberMail)
                     .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            refreshTokenRepository.findByMemberId(member.getMemberId());
+            refreshTokenRepository.findByMemberId(member.getMemberId()); // 230618 수정 필요: 실제 값이 같은지를 확인해야하는데 이거 그냥 찾는 로직
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT RefreshToken", e);
+            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {

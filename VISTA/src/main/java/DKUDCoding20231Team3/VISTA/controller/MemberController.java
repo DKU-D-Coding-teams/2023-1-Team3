@@ -5,7 +5,6 @@ import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.ErrorCode;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import DKUDCoding20231Team3.VISTA.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

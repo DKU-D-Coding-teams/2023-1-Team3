@@ -1,7 +1,8 @@
 package DKUDCoding20231Team3.VISTA.domain.entity;
 
 import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
-import DKUDCoding20231Team3.VISTA.dto.request.*;
+import DKUDCoding20231Team3.VISTA.dto.request.MyPageRequest;
+import DKUDCoding20231Team3.VISTA.dto.request.SignUpRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

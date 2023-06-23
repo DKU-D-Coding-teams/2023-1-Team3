@@ -16,6 +16,9 @@ public enum ErrorCode {
     INVALID_REQUEST_TOKEN(401, "인증 토큰이 요청 헤더에 존재하지 않습니다."),
     INVALID_ACCESS_TOKEN(401, "엑세스 토큰이 유효하지 않습니다"),
 
+    //403 FORBIDDEN
+    EXPIRED_JWT(403, "JWT가 만료되었습니다"),
+
     //404 NOT_FOUND
     NOT_FOUND(404, "존재하지 않는 값입니다."),
     NOT_FOUND_MEMBER(404, "존재하지 않는 사용자입니다."),

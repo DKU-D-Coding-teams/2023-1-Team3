@@ -29,6 +29,8 @@ public class StompInterceptor implements ChannelInterceptor {
             final String sessionId = headerAccessor.getSessionId();
             final Long memberId = Long.parseLong(Objects.requireNonNull(headerAccessor.getFirstNativeHeader("memberId")));
             sessionRepositrory.updateSession(sessionId, memberId);
+        } else if (StompCommand.SEND.equals(headerAccessor.getCommand())) {
+
         }
 
         return message;
