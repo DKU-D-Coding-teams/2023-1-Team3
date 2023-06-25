@@ -30,6 +30,7 @@ public class StompInterceptor implements ChannelInterceptor {
             final Long memberId = Long.parseLong(Objects.requireNonNull(headerAccessor.getFirstNativeHeader("memberId")));
             sessionRepositrory.updateSession(sessionId, memberId);
         }
+        /*jwt*/
 
         return message;
     }
