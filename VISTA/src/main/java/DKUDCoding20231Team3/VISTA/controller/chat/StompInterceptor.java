@@ -30,6 +30,18 @@ public class StompInterceptor implements ChannelInterceptor {
             final Long memberId = Long.parseLong(Objects.requireNonNull(headerAccessor.getFirstNativeHeader("memberId")));
             sessionRepositrory.updateSession(sessionId, memberId);
         } else if (StompCommand.SEND.equals(headerAccessor.getCommand())) {
+            final String AccessToken = headerAccessor.getFirstNativeHeader("access_token");
+
+            
+
+            /*
+                AT_HEADER = "access_token";
+                RT_HEADER = "refresh_token";
+
+                1. AT 유효성 검사 성공 -> 아무것도 안해
+                2. AT 유효성 검사 실패 ->
+
+             */
 
         }
 

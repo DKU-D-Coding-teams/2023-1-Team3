@@ -12,16 +12,12 @@ function setConnected(connected) {
 }
 
 function connect() {
-    console.log("function connect() - checkpoint 1");
     var socket = new SockJS('/chat');
     var memberId = 1;
     var headers = { 'memberId' : memberId };
-    console.log("function connect() - checkpoint 2");
 
     stompClient = Stomp.over(socket);
-    console.log("function connect() - checkpoint 3");
     stompClient.connect({}, function (frame) {
-        console.log("function connect() - checkpoint 4");
         setConnected(true);
         console.log('Connected: ' + frame);
     });
@@ -69,12 +65,14 @@ function printMessage(chatMessageResponse) {
 
 function fetch() {
     var memberId = $("#memberId").val();
+    var accessToken = { 'access_token' : accessToken };
 
     stompClient.send("/app/fetch", {}, JSON.stringify({ 'memberId': memberId, 'timeStamp': new Date(2006, 0, 2, 15, 4, 5) }));
 }
 
 function sendMsg() {
     var memberId = $("#memberId").val();
+    var accessToken = { 'access_token' : accessToken };
 
     stompClient.send("/app/send", {}, JSON.stringify({'sendMemberId': memberId, 'recvMemberId': $("#recv-memberId").val(), 'timeStamp': new Date(2006, 0, 2, 15, 4, 5), 'message': $("#msg").val()}));
 }

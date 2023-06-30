@@ -18,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("member/")
+@RequestMapping("/member")
 public class MemberController {
 
     private final MemberService memberService;
@@ -26,7 +26,7 @@ public class MemberController {
 
     // without token
 
-    @PostMapping("mail")
+    @PostMapping("/mail")
     public ResponseEntity<HttpStatus> sendMail(@Valid @RequestBody MailRequest mailRequest) {
         String memberMail = mailRequest.getMail();
 
@@ -37,7 +37,7 @@ public class MemberController {
 //        return ResponseEntity.status(memberService.sendMail(mailRequest)).build();
 //    }
 
-    @PostMapping("code")
+    @PostMapping("/code")
     public ResponseEntity<HttpStatus> checkMail(@Valid @RequestBody MailCodeRequest mailCodeRequest) {
         String memberMail = mailCodeRequest.getMail();
         String memebrCode = mailCodeRequest.getCode();
@@ -49,12 +49,12 @@ public class MemberController {
 //        return ResponseEntity.status(memberService.checkMail(mailCodeRequest)).build();
 //    }
 
-    @PostMapping("signup")
+    @PostMapping("/signup")
     public ResponseEntity<SignUpResponse> signup(@Valid @RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signUp(signUpRequest));
     }
 
-    @PostMapping("signin")
+    @PostMapping("/signin")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         String memberMail = signInRequest.getMail();
         String memberPassword = signInRequest.getPassword();
@@ -69,7 +69,7 @@ public class MemberController {
 
     // with token
 
-    @GetMapping("suggest")
+    @GetMapping("/suggest")
     public ResponseEntity<SuggestResponse> suggest() {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -80,7 +80,7 @@ public class MemberController {
 //        return ResponseEntity.status(HttpStatus.OK).body(memberService.suggest(httpServletRequest));
 //    }
 
-    @PutMapping("choice")
+    @PutMapping("/choice")
     public ResponseEntity<HttpStatus> choiceLike(@RequestParam("toId") Long toId,
                                                  @RequestParam("likeSignal") Boolean likeSignal) {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -94,7 +94,7 @@ public class MemberController {
 //        return ResponseEntity.status(memberService.choiceLike(toId, likeSignal, httpServletRequest)).build();
 //    }
 
-    @PutMapping("block")
+    @PutMapping("/block")
     public ResponseEntity<HttpStatus> choiceBlock(@RequestParam("toId") Long toId,
                                                  @RequestParam("blockSignal") Boolean blockSignal) {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -108,7 +108,7 @@ public class MemberController {
 //        return ResponseEntity.status(memberService.choiceBlock(toId, blockSignal, httpServletRequest)).build();
 //    }
 
-    @GetMapping("likes")
+    @GetMapping("/likes")
     public ResponseEntity<LikeResponse> getLikes(@RequestParam("page") Integer page) {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -120,7 +120,7 @@ public class MemberController {
 //        return ResponseEntity.status(HttpStatus.OK).body(memberService.getLikes(page, httpServletRequest));
 //    }
 
-    @PostMapping("reset")
+    @PostMapping("/reset")
     public ResponseEntity<HttpStatus> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -132,7 +132,7 @@ public class MemberController {
 //        return ResponseEntity.status(memberService.resetPassword(resetPasswordRequest, httpServletRequest)).build();
 //    }
 
-    @PostMapping("images")
+    @PostMapping("/images")
     public ResponseEntity<MemberResponse> uploadImage(@RequestParam("image") MultipartFile image)
             throws IOException, NoSuchAlgorithmException {
         if(image.getSize() == 0) throw new VistaException(ErrorCode.INVALID_MULTIPART_REQUEST);
@@ -146,7 +146,7 @@ public class MemberController {
 //        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.uploadImage(image, httpServletRequest));
 //    }
 
-    @GetMapping("mypages")
+    @GetMapping("/mypages")
     public ResponseEntity<MemberResponse> getMyPages() {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -157,7 +157,7 @@ public class MemberController {
 //        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMyPages(httpServletRequest));
 //    }
 
-    @PostMapping("mypages")
+    @PostMapping("/mypages")
     public ResponseEntity<MemberResponse> updateMyPages(@Valid @RequestBody MyPageRequest myPageRequest) {
         String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 

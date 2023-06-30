@@ -2,13 +2,12 @@
 <html>
 <head>
     <title>Hello WebSocket</title>
-    <link type="application/octet-stream" href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link type="application/octet-stream" href="/main.css" rel="stylesheet">
-    <script type="application/octet-stream" src="/webjars/jquery/jquery.min.js"></script>
-    <script type="application/octet-stream" src="/webjars/sockjs-client/sockjs.min.js"></script>
-    <script type="application/octet-stream" src="/webjars/stomp-websocket/stomp.min.js"></script>
-    <script type="application/octet-stream" src="/app.js"></script>
-
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
 </head>
 <body>
 <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
@@ -51,20 +50,21 @@
             </form>
         </div>
     </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table id="conversation" class="table table-striped">
+            <thead>
+            <tr>
+                <th>chat</th>
+            </tr>
+            </thead>
+            <tbody id="chat">
+            </tbody>
+        </table>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>chat</th>
-                </tr>
-                </thead>
-                <tbody id="chat">
-                </tbody>
-            </table>
-        </div>
-    </div>
+</div>
+<input type="text" id="accessToken" class="form-control" placeholder="set accessToken">
 </div>
 </body>
 </html>

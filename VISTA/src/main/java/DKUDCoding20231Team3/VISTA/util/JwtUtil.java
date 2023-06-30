@@ -39,8 +39,8 @@ public class JwtUtil {
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
-    public static final long AT_EXP_TIME =  1 * MINUTE;
-    public static final long RT_EXP_TIME =  1 * MINUTE;
+    public static final long AT_EXP_TIME =  15 * MINUTE;
+    public static final long RT_EXP_TIME =  7 * MONTH;
 
     // Header
     public static final String AT_HEADER = "access_token";
