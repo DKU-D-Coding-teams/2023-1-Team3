@@ -11,11 +11,12 @@ import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    Optional<RefreshToken> findByMemberId(Long memberId);
+    Optional<RefreshToken> findByMember(Long memberId);
+//    Optional<RefreshToken> findByMemberId(Long memberId);
 
     @Transactional
     @Modifying
-    @Query(value = "update RefreshToken as r set r.refreshToken = ?2 where r.memberId = ?1")
+    @Query(value = "update RefreshToken as r set r.refreshToken = ?2 where r.member = ?1")
     void saveRefreshTokenByMail(Long memberId, String refreshToken);
 
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface SuggestRefreshRepository extends JpaRepository<SuggestRefresh, Long> {
 
-    Optional<SuggestRefresh> findByMemberId(Long memberId);
+    Optional<SuggestRefresh> findByMember(Long memberId);
+//    Optional<SuggestRefresh> findByMemberId(Long memberId);
 
 }

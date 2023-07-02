@@ -24,9 +24,13 @@ public class Chat {
     @Column(name = "chat_id")
     private Long chatId;
 
-    private Long sendMemberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member sendMember;
+//    private Long sendMemberId;
 
-    private Long recvMemberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member recvMember;
+//    private Long recvMemberId;
 
     private LocalDateTime timeStamp;
 
@@ -34,8 +38,10 @@ public class Chat {
 
     public static Chat of(ChatMessage chatMessage) {
         return Chat.builder()
-                .sendMemberId(chatMessage.getSendMemberId())
-                .recvMemberId(chatMessage.getRecvMemberId())
+                .sendMember(chatMessage.getSendMember())
+//                .sendMemberId(chatMessage.getSendMemberId())
+                .recvMember(chatMessage.getRecvMember())
+//                .recvMemberId(chatMessage.getRecvMemberId())
                 .timeStamp(chatMessage.getTimeStamp())
                 .message(chatMessage.getMessage())
                 .build();

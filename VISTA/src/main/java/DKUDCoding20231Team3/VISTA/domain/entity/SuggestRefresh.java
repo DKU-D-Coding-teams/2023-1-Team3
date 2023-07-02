@@ -12,18 +12,27 @@ import lombok.*;
 public class SuggestRefresh {
 
     @Id
-    @Column(name = "member_id")
-    private Long memberId;
+    @Column(name = "suggest_refresh_id")
+    private Long suggestRefreshId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
     @Getter
     @Setter
     private boolean refreshSignal;
 
-    public static SuggestRefresh of(Long memberId, boolean refreshSignal) {
+    public static SuggestRefresh of(Member member, boolean refreshSignal) {
         return SuggestRefresh.builder()
-                .memberId(memberId)
+                .member(member)
                 .refreshSignal(refreshSignal)
                 .build();
     }
+//    public static SuggestRefresh of(Long memberId, boolean refreshSignal) {
+//        return SuggestRefresh.builder()
+//                .memberId(memberId)
+//                .refreshSignal(refreshSignal)
+//                .build();
+//    }
 
 }

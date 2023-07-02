@@ -180,8 +180,9 @@ public class JwtUtil {
             String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
             Member member = memberRepository.findByMail(memberMail)
                     .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            refreshTokenRepository.findByMemberId(member.getMemberId()); // 230618 수정 필요: 실제 값이 같은지를 확인해야하는데 이거 그냥 찾는 로직
-            return true;
+            if (refreshToken == refreshTokenRepository.findByMember(member.getMemberId()).toString())
+                return true;
+//            refreshTokenRepository.findByMemberId(member.getMemberId()); // 230618 수정 필요: 실제 값이 같은지를 확인해야하는데 이거 그냥 찾는 로직
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT RefreshToken", e);
             throw new VistaException(EXPIRED_JWT);

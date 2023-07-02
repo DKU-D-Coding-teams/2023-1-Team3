@@ -132,17 +132,22 @@ public class MemberService implements UserDetailsService {
         final Member member = memberRepository.findByMail(memberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
-        SuggestRefresh suggestRefresh = suggestRefreshRepository.findByMemberId(member.getMemberId())
-                .orElse(SuggestRefresh.of(member.getMemberId(), false));
-        if(suggestRefresh.isRefreshSignal()) memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
+        SuggestRefresh suggestRefresh = suggestRefreshRepository.findByMember(member.getMemberId())
+                .orElse(SuggestRefresh.of(member, false));
+//        SuggestRefresh suggestRefresh = suggestRefreshRepository.findByMemberId(member.getMemberId())
+//                .orElse(SuggestRefresh.of(member.getMemberId(), false));
+        if(suggestRefresh.isRefreshSignal()) memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromMember(member.getMemberId());
+//        if(suggestRefresh.isRefreshSignal()) memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
 
         Random random = new Random();
         List<MemberResponse> memberResponses = new ArrayList<>();
         List<MemberLog> memberLogs = new ArrayList<>();
-        List<MemberInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
+        List<Member> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
+//        List<MemberInterface> suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
 
         if(suggestMembers.size() == 0) {
-            memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
+            memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromMember(member.getMemberId());
+//            memberLogRepository.deleteByBlockSignalFalseAndLikeSignalFalseAndFromId(member.getMemberId());
             suggestMembers = memberRepository.getSuggestQuery(member.getMemberId(), member.getGender());
             if(suggestMembers.size() == 0) return SuggestResponse.of(true, 0, memberResponses);
         }
@@ -151,9 +156,11 @@ public class MemberService implements UserDetailsService {
             if(suggestMembers.size() == 0) break;
 
             int randomIndex = random.nextInt(suggestMembers.size());
-            MemberInterface randomMember = suggestMembers.get(randomIndex);
+            Member randomMember = suggestMembers.get(randomIndex);
+//            MemberInterface randomMember = suggestMembers.get(randomIndex);
             suggestMembers.remove(randomMember);
-            memberLogs.add(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false, false));
+            memberLogs.add(MemberLog.of(member, randomMember, false, false));
+//            memberLogs.add(MemberLog.of(member.getMemberId(), randomMember.getMemberId(), false, false));
             memberResponses.add(MemberResponse.of(randomMember));
         }
         memberLogRepository.saveAll(memberLogs);
@@ -203,8 +210,10 @@ public class MemberService implements UserDetailsService {
     public HttpStatus choiceLike(Long toId, Boolean likeSignal, String memberMail) {
         Member member = memberRepository.findByMail(memberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
+        MemberLog memberLog = memberLogRepository.findByFromMemberAndToMember(member.getMemberId(), toId)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
+//        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
+//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
 
         memberLog.setLikeSignal(likeSignal);
         memberLogRepository.save(memberLog);
@@ -225,8 +234,10 @@ public class MemberService implements UserDetailsService {
     public HttpStatus choiceBlock(Long toId, Boolean blockSignal, String memberMail) {
         Member member = memberRepository.findByMail(memberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
+        MemberLog memberLog = memberLogRepository.findByFromMemberAndToMember(member.getMemberId(), toId)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
+//        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
+//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
 
         memberLog.setBlockSignal(blockSignal);
         memberLogRepository.save(memberLog);
@@ -248,12 +259,15 @@ public class MemberService implements UserDetailsService {
         final int LIKE_PAGE_SIZE = 8;
         Member member = memberRepository.findByMail(memberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-        List<MemberInterface> likeMembers = memberRepository.getLikeQuery(
+        List<Member> likeMembers = memberRepository.getLikeQuery(
                 member.getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
+//        List<MemberInterface> likeMembers = memberRepository.getLikeQuery(
+//                member.getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
 
         boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
         List<MemberResponse> memberResponses = new ArrayList<>();
-        for(MemberInterface likeMember : likeMembers) memberResponses.add(MemberResponse.of(likeMember));
+        for(Member likeMember : likeMembers) memberResponses.add(MemberResponse.of(likeMember));
+//        for(MemberInterface likeMember : likeMembers) memberResponses.add(MemberResponse.of(likeMember));
 
         return LikeResponse.of(endPageSignal, memberResponses.size(), memberResponses);
     }

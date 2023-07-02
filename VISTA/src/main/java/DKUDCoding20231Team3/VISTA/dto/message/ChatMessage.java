@@ -1,5 +1,6 @@
 package DKUDCoding20231Team3.VISTA.dto.message;
 
+import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ChatMessage {
 
-    private Long sendMemberId;
+    private Member sendMember;
+//    private Long sendMemberId;
 
-    private Long recvMemberId;
+    private Member recvMember;
+//    private Long recvMemberId;
 
     private LocalDateTime timeStamp;
 

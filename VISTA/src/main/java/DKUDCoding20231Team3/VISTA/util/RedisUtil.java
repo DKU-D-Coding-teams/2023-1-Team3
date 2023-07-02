@@ -53,7 +53,8 @@ public class RedisUtil {
 
     public void setListData(ChatMessage chatMessage) {
         ListOperations<String, String> listOperations = redisTemplate.opsForList();
-        listOperations.rightPush(chatMessage.getRecvMemberId().toString(), Objects.requireNonNull(GsonUtil.toJson(chatMessage)));
+        listOperations.rightPush(chatMessage.getRecvMember().getMemberId().toString(), Objects.requireNonNull(GsonUtil.toJson(chatMessage)));
+//        listOperations.rightPush(chatMessage.getRecvMemberId().toString(), Objects.requireNonNull(GsonUtil.toJson(chatMessage)));
     }
 
     public Long getListDataLength(String key) {

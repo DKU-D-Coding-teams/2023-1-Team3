@@ -10,9 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -49,6 +47,22 @@ public class Member implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
+
+    @OrderBy("chatId")
+    @OneToMany(mappedBy = "sendMember", cascade = CascadeType.REMOVE)
+    private final Set<Chat> chats = new LinkedHashSet<>();
+
+    @OrderBy("memberLogId")
+    @OneToMany(mappedBy = "fromMember", cascade = CascadeType.REMOVE)
+    private final Set<MemberLog> memberLogs = new LinkedHashSet<>();
+
+    @OrderBy("refreshTokenId")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
+    private final Set<RefreshToken> refreshTokens = new LinkedHashSet<>();
+
+    @OrderBy("suggestRefreshId")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
+    private final Set<SuggestRefresh> suggestRefreshes = new LinkedHashSet<>();
 
     public static Member of(SignUpRequest signUpRequest) {
         return Member.builder()

@@ -16,9 +16,13 @@ public class MemberLog {
     @Column(name = "member_log_id")
     private Long memberLogId;
 
-    private Long fromId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member fromMember;
+//    private Long fromId;
 
-    private Long toId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member toMember;
+//    private Long toId;
 
     @Setter
     private boolean likeSignal;
@@ -26,13 +30,21 @@ public class MemberLog {
     @Setter
     private boolean blockSignal;
 
-    public static MemberLog of(Long fromId, Long toId, boolean likeSignal, boolean blockSignal) {
+    public static MemberLog of(Member fromMember, Member toMember, boolean likeSignal, boolean blockSignal) {
         return MemberLog.builder()
-                .fromId(fromId)
-                .toId(toId)
+                .fromMember(fromMember)
+                .toMember(toMember)
                 .likeSignal(likeSignal)
                 .blockSignal(blockSignal)
                 .build();
     }
+//    public static MemberLog of(Long fromId, Long toId, boolean likeSignal, boolean blockSignal) {
+//        return MemberLog.builder()
+//                .fromId(fromId)
+//                .toId(toId)
+//                .likeSignal(likeSignal)
+//                .blockSignal(blockSignal)
+//                .build();
+//    }
 
 }

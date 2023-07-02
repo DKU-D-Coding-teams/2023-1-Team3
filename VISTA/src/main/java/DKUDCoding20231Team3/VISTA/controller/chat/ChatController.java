@@ -54,10 +54,12 @@ public class ChatController {
     public void sendMessage(ChatMessage chatMessage, Message<?> message) throws Exception {
         log.info("Websocket SEND : " + GsonUtil.toJson(chatMessage));
 
-        if(sessionRepositrory.existByMemberId(chatMessage.getRecvMemberId())) {
+        if(sessionRepositrory.existByMemberId(chatMessage.getRecvMember().getMemberId())) {
+//        if(sessionRepositrory.existByMemberId(chatMessage.getRecvMemberId())) {
             chatRepository.save(Chat.of(chatMessage));
 
-            messagingTemplate.convertAndSend("/topic/" + chatMessage.getRecvMemberId(),
+            messagingTemplate.convertAndSend("/topic/" + chatMessage.getRecvMember().getMemberId(),
+//            messagingTemplate.convertAndSend("/topic/" + chatMessage.getRecvMemberId(),
                     ChatMessageResponse.of("SEND", 1, chatMessage));
 
             log.info("Websocket CASE 2 : " + chatMessage.getMessage());
