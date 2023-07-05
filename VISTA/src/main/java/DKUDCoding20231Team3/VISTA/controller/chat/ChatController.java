@@ -75,7 +75,6 @@ public class ChatController {
 
         Long fromMemberId = chatGetRequest.getFromMemberId();
         Long toMemberId = chatGetRequest.getToMemberId();
-
         List<Chat> chats = chatRepository.getChatsBySendMemberIdAndRecvMemberIdOrSendMemberIdAndRecvMemberId(
             fromMemberId, toMemberId, toMemberId, fromMemberId, PageRequest.of(chatGetRequest.getPage(), GET_MESSAGE_SIZE));
 
@@ -88,9 +87,9 @@ public class ChatController {
     public void sendMessage(ChatMessage chatMessage, Message<?> message) throws Exception {
         log.info("Websocket SEND : " + GsonUtil.toJson(chatMessage));
 
-        if(sessionRepositrory.existByMemberId(chatMessage.getRecvMemberId())) {
-            chatRepository.save(Chat.of(chatMessage));
+        chatRepository.save(Chat.of(chatMessage));
 
+        if(sessionRepositrory.existByMemberId(chatMessage.getRecvMemberId())) {
             ChatMessageResponse chatMessageResponse = new ChatMessageResponse(chatMessage);
 
             messagingTemplate.convertAndSend("/topic/" + chatMessage.getRecvMemberId(), chatMessageResponse);
