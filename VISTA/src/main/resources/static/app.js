@@ -72,7 +72,7 @@ function fetch() {
 function sendMsg() {
     var memberId = $("#memberId").val();
 
-    stompClient.send("/app/send", {}, JSON.stringify({'sendMemberId': memberId, 'recvMemberId': $("#recv-memberId").val(), 'timeStamp': new Date(2006, 0, 2, 15, 4, 5), 'message': $("#msg").val()}));
+    stompClient.send("/app/send", {}, JSON.stringify({'sendMemberId': memberId, 'recvMemberId': $("#recv-memberId").val(), 'timeStamp': giveCurrentTime(), 'message': $("#msg").val()}));
 }
 
 function showGreeting(message) {
@@ -96,3 +96,11 @@ $(function () {
     $( "#fetch" ).click(function() { subscribe(); });
     $( "#send" ).click(function() { sendMsg(); });
 });
+
+const giveCurrentTime = () => {
+    const timeElapsed = Date.now();
+    const date = new Date(timeElapsed);
+
+    const dateISO = date.toISOString().slice(0, 19) + "Z";
+    return dateISO;
+};
