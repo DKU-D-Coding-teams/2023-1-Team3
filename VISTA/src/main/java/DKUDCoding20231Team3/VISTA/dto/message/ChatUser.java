@@ -1,6 +1,7 @@
 package DKUDCoding20231Team3.VISTA.dto.message;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Chat;
+import DKUDCoding20231Team3.VISTA.domain.enumerations.Gender;
 import DKUDCoding20231Team3.VISTA.dto.database.ChatInterface;
 import lombok.*;
 
@@ -15,6 +16,10 @@ import java.util.List;
 public class ChatUser {
 
     private Long memberId;
+
+    private String name;
+
+    private Gender gender;
 
     private String image;
 
@@ -32,6 +37,8 @@ public class ChatUser {
 
         return ChatUser.builder()
                 .memberId(chatInterface.getAns())
+                .name(chatInterface.getName())
+                .gender(chatInterface.getGender())
                 .image(chatInterface.getImage())
                 .count(1)
                 .chatMessages(chatMessages).build();
