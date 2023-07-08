@@ -1,5 +1,5 @@
 version: 0.0
-os: ubuntu
+os: linux
 files:
   - source: ./frontend/dist
     destination: /home/ubuntu/repo
@@ -9,7 +9,8 @@ permissions:
     owner: ubuntu
     group: ubuntu
 hooks:
-  ApplicationStop: []
+  ApplicationStop:
+    - location: scripts/stop_server
   BeforeInstall: []
   AfterInstall: []
   ApplicationStart: []
