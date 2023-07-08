@@ -1,20 +1,17 @@
 version: 0.0
 os: linux
 files:
-  - source: ./frontend/dist
+  - source: /
     destination: /home/ubuntu/repo
+    overwrite: yes
 permissions:
   - object: /home/ubuntu/repo
-    pattern: "**"
     owner: ubuntu
     group: ubuntu
+    mode: 755
+
 hooks:
-  ApplicationStop:
+  AfterInstall:
     - location: scripts/stop_server
       timeout: 60
-      runas: ubuntu
-
-  BeforeInstall: []
-  AfterInstall: []
-  ApplicationStart: []
-  ValidateService: []
+      runas: root
