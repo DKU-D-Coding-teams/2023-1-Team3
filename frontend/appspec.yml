@@ -1,18 +1,9 @@
 version: 0.0
 os: linux
 files:
-  - source: ./dist
-    destination: /home/2023-1-Team3/frontend/
-permissions:
-  - object: /home/2023-1-Team3/frontend/
-    pattern: "**"
-    owner: ubuntu
-    group: ubuntu
+  - source: ./build
+    destination: /home/2023-1-Team3/frontend/build
 hooks:
-  ApplicationStop:
-    - location: scripts/stop_server
-      timeout: 300
-      runas: ubuntu
   AfterInstall:
     - location: scripts/start_server
       timeout: 300
