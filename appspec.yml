@@ -1,19 +1,11 @@
 version: 0.0
-os: linux
+os: ubuntu
 files:
   - source: ./frontend/dist
-    destination: /home/2023-1-Team3/frontend/dist
+    destination: /home/ubuntu/repo
 permissions:
-  - object: /home/2023-1-Team3/frontend/dist
+  - object: /home/ubuntu/repo
     pattern: "**"
     owner: ubuntu
     group: ubuntu
-hooks:
-  ApplicationStop:
-    - location: scripts/stop_server
-      timeout: 300
-      runas: ubuntu
-  AfterInstall:
-    - location: scripts/start_server
-      timeout: 300
-      runas: ubuntu
+
