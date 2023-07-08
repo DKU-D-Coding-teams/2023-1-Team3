@@ -1,3 +1,5 @@
+
+
 name: Deploy to AWS-S3-Bucket
 
 on:
@@ -47,7 +49,6 @@ jobs:
         run: |
           cd frontend
           npm run build
-
       # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -62,10 +63,13 @@ jobs:
           aws deploy push \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --ignore-hidden-files \
-            --source . \
-            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip 
-
+            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+            --source .
       # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \
+            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
