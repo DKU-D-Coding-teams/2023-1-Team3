@@ -8,4 +8,9 @@ permissions:
     pattern: "**"
     owner: ubuntu
     group: ubuntu
-
+hooks:
+  ApplicationStop: []
+  BeforeInstall: []
+  AfterInstall: []
+  ApplicationStart: []
+  ValidateService: []
