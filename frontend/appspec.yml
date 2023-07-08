@@ -4,7 +4,7 @@ files:
   - source: ./dist
     destination: /home/2023-1-Team3/frontend/
 permissions:
-  - object: /home/2023-1-Team3/frontend/dist
+  - object: /home/2023-1-Team3/frontend/
     pattern: "**"
     owner: ubuntu
     group: ubuntu
