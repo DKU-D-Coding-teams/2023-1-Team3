@@ -12,17 +12,14 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class SignInResponse {
 
-    private String grantType;
-
     private String accessToken;
 
     private String refreshToken;
 
-    public static SignInResponse of(JwtToken jwtToken) {
+    public static SignInResponse of(String accessToken, String refreshToken) {
         return SignInResponse.builder()
-                .grantType(jwtToken.getGrantType())
-                .accessToken(jwtToken.getAccessToken())
-                .refreshToken(jwtToken.getRefreshToken())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

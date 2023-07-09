@@ -2,7 +2,7 @@ package DKUDCoding20231Team3.VISTA.util;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
-import DKUDCoding20231Team3.VISTA.domain.repository.RefreshTokenRepository;
+import DKUDCoding20231Team3.VISTA.dto.response.SignInResponse;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.EXPIRED_JWT;
 import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.NOT_FOUND_MEMBER;
 
 @Slf4j
@@ -39,24 +38,23 @@ public class JwtUtil {
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
-    public static final long AT_EXP_TIME =  15 * MINUTE;
-    public static final long RT_EXP_TIME =  7 * MONTH;
+    public static final long AT_EXP_TIME =  1 * MINUTE;
+    public static final long RT_EXP_TIME =  30 * MINUTE;
 
     // Header
     public static final String AT_HEADER = "access_token";
     public static final String RT_HEADER = "refresh_token";
+    public static final String TOKEN_HEADER_PREFIX = "Bearer ";
     private final Key secretKey;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Autowired
-    public JwtUtil(@Value("${spring.jwt.secret}") String secretKey, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AuthenticationManagerBuilder authenticationManagerBuilder) {
+    public JwtUtil(@Value("${spring.jwt.secret}") String secretKey, MemberRepository memberRepository, AuthenticationManagerBuilder authenticationManagerBuilder) {
         byte[] keyBytes = Decoders.BASE64.decode((secretKey));
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.memberRepository = memberRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
@@ -84,7 +82,7 @@ public class JwtUtil {
 
     public String regenerateAccessToken(String refreshToken) {
         String mail = getMailFromToken(refreshToken);
-        final Member member = memberRepository.findByMail(mail)
+        final Member member = memberRepository.findMemberByMail(mail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
@@ -92,27 +90,27 @@ public class JwtUtil {
         return generateAccessToken(authentication);
     }
 
-//    public String regenerateRefreshToken(String refreshToken) {
-//        String mail = getMailFromToken(refreshToken);
-//        final Member member = memberRepository.findMemberByMail(mail)
-//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-//
-//        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
-//
-//        return generateRefreshToken(authentication);
-//    }
-//
-//    public BeforeSignInResponse regenerateTokens(String refreshToken) {
-//        String mail = getMailFromToken(refreshToken);
-//        final Member member = memberRepository.findMemberByMail(mail)
-//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-//
-//        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
-//        String newAccessToken = generateAccessToken(authentication);
-//        String newRefreshToken = generateRefreshToken(authentication);
-//
-//        return BeforeSignInResponse.of(newAccessToken, newRefreshToken);
-//    }
+    public String regenerateRefreshToken(String refreshToken) {
+        String mail = getMailFromToken(refreshToken);
+        final Member member = memberRepository.findMemberByMail(mail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
+
+        return generateRefreshToken(authentication);
+    }
+
+    public SignInResponse regenerateTokens(String refreshToken) {
+        String mail = getMailFromToken(refreshToken);
+        final Member member = memberRepository.findMemberByMail(mail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
+        String newAccessToken = generateAccessToken(authentication);
+        String newRefreshToken = generateRefreshToken(authentication);
+
+        return SignInResponse.of(newAccessToken, newRefreshToken);
+    }
 
     private Claims parseClaims(String Token) {
         try {
@@ -137,6 +135,7 @@ public class JwtUtil {
     public Authentication generateAuthentication(String mail, String password) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(mail, password);
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
+
         return authentication;
     }
 
@@ -146,7 +145,6 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT AccessToken", e);
-            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {
@@ -163,7 +161,6 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT AccessToken", e);
-//            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {
@@ -177,14 +174,10 @@ public class JwtUtil {
 
     public Boolean validateRefreshToken(String refreshToken) {
         try {
-            String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
-            Member member = memberRepository.findByMail(memberMail)
-                    .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            refreshTokenRepository.findByMemberId(member.getMemberId()); // 230618 수정 필요: 실제 값이 같은지를 확인해야하는데 이거 그냥 찾는 로직
+            memberRepository.findRefreshTokenByMail(Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject());
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT RefreshToken", e);
-            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {
@@ -196,10 +189,12 @@ public class JwtUtil {
         return false;
     }
 
-
-
     public String getMailFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getTokenFromHeader(HttpServletRequest request) {
+        return request.getHeader("Authorization").substring(TOKEN_HEADER_PREFIX.length());
     }
 
     public String getAccessTokenFromHeader(HttpServletRequest request) {
