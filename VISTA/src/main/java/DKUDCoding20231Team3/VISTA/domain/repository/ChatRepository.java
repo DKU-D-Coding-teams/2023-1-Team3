@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
-    @Query(value =  "SELECT k.MESSAGE AS message, k.NAME AS name, k.GENDER AS gender, k.RECV_MEMBER_ID AS recvMemberId , k.TIME_STAMP AS timeStamp, k.ans AS ans, k.rn AS rn, mtb.IMAGE AS image " +
+    @Query(value =  "SELECT k.MESSAGE AS message, mtb.NAME AS name, mtb.GENDER AS gender, k.RECV_MEMBER_ID AS recvMemberId , k.TIME_STAMP AS timeStamp, k.ans AS ans, k.rn AS rn, mtb.IMAGE AS image " +
                     "FROM ( " +
                         "SELECT *, ROW_NUMBER() OVER(PARTITION BY j.ans ORDER BY j.TIME_STAMP DESC) AS rn " +
                         "FROM ( " +
