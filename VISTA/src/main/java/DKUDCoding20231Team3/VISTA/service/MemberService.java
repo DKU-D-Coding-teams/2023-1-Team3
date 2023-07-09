@@ -3,22 +3,25 @@ package DKUDCoding20231Team3.VISTA.service;
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
 import DKUDCoding20231Team3.VISTA.domain.entity.SuggestRefresh;
-import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
-import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
-import DKUDCoding20231Team3.VISTA.domain.repository.SuggestRefreshRepository;
+import DKUDCoding20231Team3.VISTA.domain.repository.*;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
-import DKUDCoding20231Team3.VISTA.dto.request.*;
+import DKUDCoding20231Team3.VISTA.dto.request.MyPageRequest;
+import DKUDCoding20231Team3.VISTA.dto.request.ResetPasswordRequest;
+import DKUDCoding20231Team3.VISTA.dto.request.SignUpRequest;
 import DKUDCoding20231Team3.VISTA.dto.response.*;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
-import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
-import DKUDCoding20231Team3.VISTA.jwt.JwtTokenProvider;
+import DKUDCoding20231Team3.VISTA.util.JwtUtil;
 import DKUDCoding20231Team3.VISTA.util.MailUtil;
 import DKUDCoding20231Team3.VISTA.util.OCIUtil;
 import DKUDCoding20231Team3.VISTA.util.RedisUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,33 +36,35 @@ import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
     private final MemberLogRepository memberLogRepository;
     private final SuggestRefreshRepository suggestRefreshRepository;
+    private final ChatRepository chatRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtUtil jwtUtil;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
     private final OCIUtil ociUtil;
-    private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public HttpStatus sendMail(MailRequest mailRequest) {
-        if (memberRepository.existsByMail(mailRequest.getMail())) throw new VistaException(ALREADY_SAVED_MEMBER);
+    public HttpStatus sendMail(String requestedMemberMail) {
+        if (memberRepository.existsByMail(requestedMemberMail)) throw new VistaException(ALREADY_SAVED_MEMBER);
 
-        final String code = mailUtil.codeSend(mailRequest.getMail());
-        redisUtil.setDataExpire(mailRequest.getMail(), code, 60000);
+        final String code = mailUtil.codeSend(requestedMemberMail);
+        redisUtil.setDataExpire(requestedMemberMail, code, 60000);
 
         return HttpStatus.CREATED;
     }
 
-    public HttpStatus checkMail(MailCodeRequest mailCodeRequest) {
-        final String code = redisUtil.getData(mailCodeRequest.getMail());
-        if (code == null || !code.equals(mailCodeRequest.getCode()))
+    public HttpStatus checkMail(String requestedMemberMail, String requestedMemberCode) {
+        final String savedMemberCode = redisUtil.getData(requestedMemberMail);
+        if (savedMemberCode == null || !savedMemberCode.equals(requestedMemberCode))
             throw new VistaException(INVALID_MAIL_CODE);
 
-        redisUtil.deleteData(mailCodeRequest.getMail());
-        redisUtil.setDataExpire(mailCodeRequest.getMail(), "OK", 60000);
+        redisUtil.deleteData(requestedMemberMail);
+        redisUtil.setDataExpire(requestedMemberMail, "OK", 60000);
 
         return HttpStatus.CREATED;
     }
@@ -77,22 +82,25 @@ public class MemberService {
         return SignUpResponse.of(member);
     }
 
-    public SignInResponse signIn(SignInRequest signInRequest) {
-        final Member member = memberRepository.findByMail(signInRequest.getMail())
+    public SignInResponse signIn(String requestedMemberMail, String requestedMemberPassword) {
+        final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
-        if(!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword()))
+        if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
 
-        JwtToken jwtToken = jwtTokenProvider.generateToken(member.getMail());
+        Authentication authentication = jwtUtil.generateAuthentication(member.getMail(), member.getPassword());
+        String accessToken = jwtUtil.generateAccessToken(authentication);
+        String refreshToken = jwtUtil.generateRefreshToken(authentication);
 
-        return SignInResponse.of(jwtToken);
+        return SignInResponse.of(accessToken, refreshToken);
     }
 
-    public SuggestResponse suggest(HttpServletRequest httpServletRequest) {
+    public SuggestResponse suggest(String memberMail) {
         final int SUGGEST_SIZE = 8;
 
-        final Member member = findMemberByHttpServlet(httpServletRequest);
+        final Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         SuggestRefresh suggestRefresh = suggestRefreshRepository.findByMemberId(member.getMemberId())
                 .orElse(SuggestRefresh.of(member.getMemberId(), false));
@@ -125,10 +133,11 @@ public class MemberService {
 
         return SuggestResponse.of(false, memberResponses.size(), memberResponses);
     }
-    
-    public HttpStatus choiceLike(Long toId, Boolean likeSignal, HttpServletRequest httpServletRequest) {
-        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
-                findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
+
+    public HttpStatus choiceLike(Long toId, Boolean likeSignal, String memberMail) {
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
 
         memberLog.setLikeSignal(likeSignal);
@@ -137,9 +146,10 @@ public class MemberService {
         return HttpStatus.OK;
     }
 
-    public HttpStatus choiceBlock(Long toId, Boolean blockSignal, HttpServletRequest httpServletRequest) {
-        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(
-                        findMemberByHttpServlet(httpServletRequest).getMemberId(), toId)
+    public HttpStatus choiceBlock(Long toId, Boolean blockSignal, String memberMail) {
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+        MemberLog memberLog = memberLogRepository.findByFromIdAndToId(member.getMemberId(), toId)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER_LOG));
 
         memberLog.setBlockSignal(blockSignal);
@@ -148,10 +158,12 @@ public class MemberService {
         return HttpStatus.OK;
     }
 
-    public LikeResponse getLikes(Integer page, HttpServletRequest httpServletRequest) {
+    public LikeResponse getLikes(Integer page, String memberMail) {
         final int LIKE_PAGE_SIZE = 8;
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
         List<MemberInterface> likeMembers = memberRepository.getLikeQuery(
-                findMemberByHttpServlet(httpServletRequest).getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
+                member.getMemberId(), PageRequest.of(page, LIKE_PAGE_SIZE));
 
         boolean endPageSignal = likeMembers.size() < LIKE_PAGE_SIZE;
         List<MemberResponse> memberResponses = new ArrayList<>();
@@ -160,8 +172,9 @@ public class MemberService {
         return LikeResponse.of(endPageSignal, memberResponses.size(), memberResponses);
     }
 
-    public HttpStatus resetPassword(ResetPasswordRequest resetPasswordRequest, HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+    public HttpStatus resetPassword(ResetPasswordRequest resetPasswordRequest, String memberMail) {
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         if(!passwordEncoder.matches(resetPasswordRequest.getCurrentPassword(), member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
@@ -172,8 +185,10 @@ public class MemberService {
         return HttpStatus.OK;
     }
 
-    public MemberResponse uploadImage(MultipartFile image, HttpServletRequest httpServletRequest) throws IOException, NoSuchAlgorithmException {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+    public MemberResponse uploadImage(MultipartFile image, String memberMail)
+            throws IOException, NoSuchAlgorithmException {
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
         member.setImage(ociUtil.putImage(member.getMail(), image));
         memberRepository.save(member);
@@ -181,32 +196,56 @@ public class MemberService {
         return MemberResponse.of(member);
     }
 
-    public MemberResponse getMyPages(HttpServletRequest httpServletRequest) {
-        return MemberResponse.of(findMemberByHttpServlet(httpServletRequest));
+    public MemberResponse getMyPages(String memberMail) {
+        return MemberResponse.of(memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER)));
     }
 
-    public MemberResponse updateMyPages(MyPageRequest myPageRequest, HttpServletRequest httpServletRequest) {
-        Member member = findMemberByHttpServlet(httpServletRequest);
+    public MemberResponse updateMyPages(MyPageRequest myPageRequest, String memberMail) {
+        Member member = memberRepository.findByMail(memberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
         member.update(myPageRequest);
         memberRepository.save(member);
 
         return MemberResponse.of(member);
     }
 
-    private Member findMemberByHttpServlet(HttpServletRequest httpServletRequest) {
-        final String token = jwtTokenProvider.resolveToken(httpServletRequest);
+    public HttpStatus signOut(String requestedMemberMail, String requestedMemberPassword) {
+        final Member member = memberRepository.findByMail(requestedMemberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
-        if (token != null && token.startsWith("Bearer ")) {
-            String jwt = token.substring(7);
-            if (jwtTokenProvider.validateToken(jwt)) {
-                return memberRepository.findByMail(jwtTokenProvider.getSubject(jwt))
-                        .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            }
-            else
-                throw new VistaException(INVALID_ACCESS_TOKEN);
-        } else {
-            throw new VistaException(INVALID_REQUEST_TOKEN);
+        if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
+            throw new VistaException(INVALID_PASSWORD);
+
+        String memberMail = member.getMail();
+        Long memberId = member.getMemberId();
+
+        memberRepository.deleteMemberByMail(member.getMail());
+        memberLogRepository.deleteByFromIdOrToId(memberId, memberId);
+        chatRepository.deleteBySendMemberIdOrRecvMemberId(memberId, memberId);
+        refreshTokenRepository.deleteByMemberId(memberId);
+        suggestRefreshRepository.deleteByMemberId(memberId);
+
+        if (memberRepository.existsByMail(memberMail) || memberLogRepository.existsByFromIdOrToId(memberId, memberId) || chatRepository.existsBySendMemberIdOrRecvMemberId(memberId, memberId) || refreshTokenRepository.existsByMemberId(memberId) || suggestRefreshRepository.existsByMemberId(memberId)) {
+            throw new VistaException(INTERNAL_SERVER_ERROR);
         }
+
+        return HttpStatus.OK;
     }
-    
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return memberRepository.findByMail(username)
+                .map(this::createUserDetails)
+                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
+    }
+
+    private UserDetails createUserDetails(Member member) {
+        return User.builder()
+                .username(member.getUsername())
+                .password(passwordEncoder.encode(member.getPassword()))
+                .roles(member.getRoles().toArray(new String[0]))
+                .build();
+    }
+
 }

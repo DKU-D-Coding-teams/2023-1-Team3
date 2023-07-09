@@ -15,4 +15,9 @@ public interface MemberLogRepository extends JpaRepository<MemberLog, Long> {
 
     Optional<MemberLog> findByFromIdAndToId(Long fromId, Long toId);
 
+    boolean existsByFromIdOrToId(Long fromId, Long toId);
+
+    @Transactional
+    void deleteByFromIdOrToId(Long fromId, Long toId);
+
 }
