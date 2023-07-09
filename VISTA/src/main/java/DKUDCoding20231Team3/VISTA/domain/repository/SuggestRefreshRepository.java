@@ -10,6 +10,8 @@ public interface SuggestRefreshRepository extends JpaRepository<SuggestRefresh, 
 
     Optional<SuggestRefresh> findByMemberId(Long memberId);
 
+    boolean existsByMemberId(Long memberId);
+
     @Transactional
     void deleteByMemberId(Long memberId);
 

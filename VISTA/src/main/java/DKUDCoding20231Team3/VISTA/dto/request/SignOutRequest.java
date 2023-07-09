@@ -11,9 +11,6 @@ import lombok.NonNull;
 @NoArgsConstructor
 public class SignOutRequest {
 
-    @Pattern(regexp = "^[a-zA-Z0-9]+@dankook\\.ac\\.kr$")
-    private String mail;
-
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$")
     private String password;
 

@@ -218,7 +218,9 @@ public class MemberService implements UserDetailsService {
         if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
 
+        String memberMail = member.getMail();
         Long memberId = member.getMemberId();
+        boolean signal = true;
 
         memberRepository.deleteMemberByMail(member.getMail());
         memberLogRepository.deleteByFromIdOrToId(memberId, memberId);
@@ -226,7 +228,9 @@ public class MemberService implements UserDetailsService {
         refreshTokenRepository.deleteByMemberId(memberId);
         suggestRefreshRepository.deleteByMemberId(memberId);
 
-        boolean signal = true;
+        if (memberRepository.existsByMail(memberMail) || memberLogRepository.existsByFromIdOrToId(memberId, memberId) || chatRepository.existsBySendMemberIdOrRecvMemberId(memberId, memberId) || refreshTokenRepository.existsByMemberId(memberId) || suggestRefreshRepository.existsByMemberId(memberId)) {
+            signal = false;
+        }
 
         return SignOutResponse.of(signal);
     }

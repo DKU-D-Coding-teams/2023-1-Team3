@@ -32,6 +32,8 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             Long sendMemberId_2,
             Long recvMemberId_2, Pageable pageable);
 
+    boolean existsBySendMemberIdOrRecvMemberId(Long sendMemberId, Long recvMemberId);
+
     @Transactional
     void deleteBySendMemberIdOrRecvMemberId(Long sendMemberId, Long recvMemberId);
 }

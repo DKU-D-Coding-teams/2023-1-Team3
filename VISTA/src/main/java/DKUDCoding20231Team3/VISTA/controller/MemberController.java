@@ -119,7 +119,7 @@ public class MemberController {
     @PostMapping("/signout")
     public ResponseEntity<SignOutResponse> signOut(@Valid @RequestBody SignOutRequest signOutRequest) {
         System.out.println("MemberController method signOut - checkpoint 1");
-        String memberMail = signOutRequest.getMail();
+        String memberMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String memberPassword = signOutRequest.getPassword();
 
         return ResponseEntity.status(HttpStatus.OK).body(memberService.signOut(memberMail, memberPassword));
