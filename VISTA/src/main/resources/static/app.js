@@ -16,6 +16,9 @@ function connect() {
     var memberId = 1;
     var headers = { 'memberId' : memberId };
 
+    console.log("checking method connect()");
+    console.log("connect() memberId: " + memberId);
+
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
@@ -26,6 +29,8 @@ function connect() {
 function subscribe() {
     var memberId = $("#memberId").val()
     var headers = { 'memberId' : memberId };
+
+    console.log("subscribe() memberId: " + memberId);
 
     stompClient.subscribe(`/topic/${memberId}`, function (response) {
         onMessageReceived(response);
@@ -60,21 +65,25 @@ function printMessage(chatMessageResponse) {
             + "recver: " + chatMessage.recvMemberId + " "
             + "message: " + chatMessage.message + "</td></tr>");
     }
-
 }
 
 function fetch() {
     var memberId = $("#memberId").val();
-    var accessToken = { 'access_token' : accessToken };
+    var accessToken = $("#access-token").val();
+    var headers = { 'memberId' : memberId, 'accessToken' : accessToken };
 
-    stompClient.send("/app/fetch", {}, JSON.stringify({ 'memberId': memberId, 'timeStamp': new Date(2006, 0, 2, 15, 4, 5) }));
+    console.log("fetch() memberId: " + memberId);
+    console.log("fetch() accessToken: " + accessToken);
+
+    stompClient.send("/app/fetch", headers, JSON.stringify({ 'memberId': memberId, 'timeStamp': new Date(2006, 0, 2, 15, 4, 5) }));
 }
 
 function sendMsg() {
     var memberId = $("#memberId").val();
-    var accessToken = { 'access_token' : accessToken };
+    var accessToken = $("#access-token").val();
+    var headers = { 'memberId' : memberId, 'accessToken' : accessToken };
 
-    stompClient.send("/app/send", {}, JSON.stringify({'sendMemberId': memberId, 'recvMemberId': $("#recv-memberId").val(), 'timeStamp': new Date(2006, 0, 2, 15, 4, 5), 'message': $("#msg").val()}));
+    stompClient.send("/app/send", headers, JSON.stringify({'sendMemberId': memberId, 'recvMemberId': $("#recv-memberId").val(), 'timeStamp': new Date(2006, 0, 2, 15, 4, 5), 'message': $("#msg").val()}));
 }
 
 function showGreeting(message) {
@@ -86,7 +95,7 @@ function disconnect() {
         stompClient.disconnect();
     }
     setConnected(false);
-    console.log("Disconnecte    d");
+    console.log("Disconnected");
 }
 
 $(function () {

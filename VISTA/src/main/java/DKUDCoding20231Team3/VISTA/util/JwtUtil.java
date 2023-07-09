@@ -163,7 +163,7 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT AccessToken", e);
-            throw new VistaException(EXPIRED_JWT);
+//            throw new VistaException(EXPIRED_JWT);
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (UnsupportedJwtException e) {

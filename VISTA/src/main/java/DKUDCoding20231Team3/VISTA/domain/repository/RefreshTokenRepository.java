@@ -18,4 +18,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query(value = "update RefreshToken as r set r.refreshToken = ?2 where r.memberId = ?1")
     void saveRefreshTokenByMail(Long memberId, String refreshToken);
 
+    @Transactional
+    void deleteByMemberId(Long memberId);
 }

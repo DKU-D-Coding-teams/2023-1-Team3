@@ -169,4 +169,13 @@ public class MemberController {
 //        return ResponseEntity.status(HttpStatus.OK).body(memberService.updateMyPages(myPageRequest, httpServletRequest));
 //    }
 
+    @PostMapping("/signout")
+    public ResponseEntity<SignOutResponse> signOut(@Valid @RequestBody SignOutRequest signOutRequest) {
+        System.out.println("MemberController method signOut - checkpoint 1");
+        String memberMail = signOutRequest.getMail();
+        String memberPassword = signOutRequest.getPassword();
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.signOut(memberMail, memberPassword));
+    }
+
 }

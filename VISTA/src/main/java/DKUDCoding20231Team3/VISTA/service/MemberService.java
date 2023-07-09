@@ -3,9 +3,7 @@ package DKUDCoding20231Team3.VISTA.service;
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
 import DKUDCoding20231Team3.VISTA.domain.entity.SuggestRefresh;
-import DKUDCoding20231Team3.VISTA.domain.repository.MemberLogRepository;
-import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
-import DKUDCoding20231Team3.VISTA.domain.repository.SuggestRefreshRepository;
+import DKUDCoding20231Team3.VISTA.domain.repository.*;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
 import DKUDCoding20231Team3.VISTA.dto.request.MyPageRequest;
 import DKUDCoding20231Team3.VISTA.dto.request.ResetPasswordRequest;
@@ -43,6 +41,8 @@ public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final MemberLogRepository memberLogRepository;
     private final SuggestRefreshRepository suggestRefreshRepository;
+    private final ChatRepository chatRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final MailUtil mailUtil;
     private final RedisUtil redisUtil;
@@ -327,6 +327,27 @@ public class MemberService implements UserDetailsService {
         memberRepository.save(member);
 
         return MemberResponse.of(member);
+    }
+
+    public SignOutResponse signOut(String requestedMemberMail, String requestedMemberPassword) {
+        System.out.println("MemberService method signOut - checkpoint 1");
+        final Member member = memberRepository.findByMail(requestedMemberMail)
+                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
+
+        if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
+            throw new VistaException(INVALID_PASSWORD);
+
+        Long memberId = member.getMemberId();
+
+        memberRepository.deleteMemberByMail(member.getMail());
+        memberLogRepository.deleteByFromIdOrToId(memberId, memberId);
+        chatRepository.deleteBySendMemberIdOrRecvMemberId(memberId, memberId);
+        refreshTokenRepository.deleteByMemberId(memberId);
+        suggestRefreshRepository.deleteByMemberId(memberId);
+
+        boolean signal = true;
+
+        return SignOutResponse.of(signal);
     }
 
     @Override
