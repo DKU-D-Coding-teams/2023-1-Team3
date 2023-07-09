@@ -1,6 +1,7 @@
 package DKUDCoding20231Team3.VISTA.util;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
+import DKUDCoding20231Team3.VISTA.domain.entity.RefreshToken;
 import DKUDCoding20231Team3.VISTA.domain.repository.MemberRepository;
 import DKUDCoding20231Team3.VISTA.domain.repository.RefreshTokenRepository;
 import DKUDCoding20231Team3.VISTA.exception.VistaException;
@@ -26,8 +27,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.EXPIRED_JWT;
-import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.NOT_FOUND_MEMBER;
+import static DKUDCoding20231Team3.VISTA.exception.ErrorCode.*;
 
 @Slf4j
 @Component
@@ -135,12 +135,15 @@ public class JwtUtil {
         return false;
     }
 
-    public Boolean validateRefreshToken(String refreshToken) {
+    public Boolean validateRefreshToken(String requestedRefreshToken) {
         try {
-            String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
+            String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(requestedRefreshToken).getBody().getSubject();
             Member member = memberRepository.findByMail(memberMail)
                     .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            if (refreshToken.equals(refreshTokenRepository.findByMemberId(member.getMemberId()))) {
+            RefreshToken refreshToken = refreshTokenRepository.findByMemberId(member.getMemberId())
+                    .orElseThrow(() -> new VistaException(NOT_FOUND_REFRESH_TOKEN));
+
+            if (requestedRefreshToken.equals(refreshToken.getRefreshToken())) {
                 return true;
             }
         } catch (ExpiredJwtException e) {
