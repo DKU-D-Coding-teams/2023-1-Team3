@@ -17,7 +17,7 @@ public enum ErrorCode {
     INVALID_ACCESS_TOKEN(401, "엑세스 토큰이 유효하지 않습니다"),
 
     //403 FORBIDDEN
-    EXPIRED_JWT(403, "JWT가 만료되었습니다"),
+    EXPIRED_JWT(403, "인증 토큰이 만료되었습니다"),
 
     //404 NOT_FOUND
     NOT_FOUND(404, "존재하지 않는 값입니다."),
@@ -28,6 +28,7 @@ public enum ErrorCode {
     ALREADY_SAVED_MEMBER(409, "이미 서비스에 가입된 계정입니다."),
     INVALID_MAIL_CODE(409, "유효하지 않은 인증코드 입니다."),
     INVALID_PASSWORD(409, "비밀번호가 일치하지 않습니다."),
+
 
     //500 INTERNAL SERVER ERROR
     INTERNAL_SERVER_ERROR(500, "서버 내부 에러입니다.");

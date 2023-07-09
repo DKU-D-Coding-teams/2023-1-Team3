@@ -210,8 +210,7 @@ public class MemberService implements UserDetailsService {
         return MemberResponse.of(member);
     }
 
-    public SignOutResponse signOut(String requestedMemberMail, String requestedMemberPassword) {
-        System.out.println("MemberService method signOut - checkpoint 1");
+    public HttpStatus signOut(String requestedMemberMail, String requestedMemberPassword) {
         final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
@@ -220,7 +219,6 @@ public class MemberService implements UserDetailsService {
 
         String memberMail = member.getMail();
         Long memberId = member.getMemberId();
-        boolean signal = true;
 
         memberRepository.deleteMemberByMail(member.getMail());
         memberLogRepository.deleteByFromIdOrToId(memberId, memberId);
@@ -229,10 +227,10 @@ public class MemberService implements UserDetailsService {
         suggestRefreshRepository.deleteByMemberId(memberId);
 
         if (memberRepository.existsByMail(memberMail) || memberLogRepository.existsByFromIdOrToId(memberId, memberId) || chatRepository.existsBySendMemberIdOrRecvMemberId(memberId, memberId) || refreshTokenRepository.existsByMemberId(memberId) || suggestRefreshRepository.existsByMemberId(memberId)) {
-            signal = false;
+            throw new VistaException(INTERNAL_SERVER_ERROR);
         }
 
-        return SignOutResponse.of(signal);
+        return HttpStatus.OK;
     }
 
     @Override

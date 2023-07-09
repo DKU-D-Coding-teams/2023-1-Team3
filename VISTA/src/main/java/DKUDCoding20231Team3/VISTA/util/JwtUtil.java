@@ -37,10 +37,9 @@ public class JwtUtil {
     public static final long MINUTE = SECOND * 60;
     public static final long HOUR = 60 * MINUTE;
     public static final long DAY = 24 * HOUR;
-    public static final long MONTH = 30 * DAY;
 
     public static final long AT_EXP_TIME =  15 * MINUTE;
-    public static final long RT_EXP_TIME =  7 * MONTH;
+    public static final long RT_EXP_TIME =  15 * DAY;
 
     // Header
     public static final String AT_HEADER = "access_token";
@@ -92,28 +91,6 @@ public class JwtUtil {
         return generateAccessToken(authentication);
     }
 
-//    public String regenerateRefreshToken(String refreshToken) {
-//        String mail = getMailFromToken(refreshToken);
-//        final Member member = memberRepository.findMemberByMail(mail)
-//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-//
-//        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
-//
-//        return generateRefreshToken(authentication);
-//    }
-//
-//    public BeforeSignInResponse regenerateTokens(String refreshToken) {
-//        String mail = getMailFromToken(refreshToken);
-//        final Member member = memberRepository.findMemberByMail(mail)
-//                .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-//
-//        Authentication authentication = generateAuthentication(member.getMail(), member.getPassword());
-//        String newAccessToken = generateAccessToken(authentication);
-//        String newRefreshToken = generateRefreshToken(authentication);
-//
-//        return BeforeSignInResponse.of(newAccessToken, newRefreshToken);
-//    }
-
     private Claims parseClaims(String Token) {
         try {
             return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(Token).getBody();
@@ -140,23 +117,6 @@ public class JwtUtil {
         return authentication;
     }
 
-    public Boolean validateToken(String Token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(Token);
-            return true;
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT AccessToken", e);
-            throw new VistaException(EXPIRED_JWT);
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
-        }
-        return false;
-    }
-
     public Boolean validateAccessToken(String accessToken) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(accessToken);
@@ -180,8 +140,9 @@ public class JwtUtil {
             String memberMail = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
             Member member = memberRepository.findByMail(memberMail)
                     .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-            refreshTokenRepository.findByMemberId(member.getMemberId()); // 230618 수정 필요: 실제 값이 같은지를 확인해야하는데 이거 그냥 찾는 로직
-            return true;
+            if (refreshToken.equals(refreshTokenRepository.findByMemberId(member.getMemberId()))) {
+                return true;
+            }
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT RefreshToken", e);
             throw new VistaException(EXPIRED_JWT);
@@ -196,34 +157,8 @@ public class JwtUtil {
         return false;
     }
 
-
-
     public String getMailFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public String getAccessTokenFromHeader(HttpServletRequest request) {
-        return request.getHeader(AT_HEADER);
-    }
-
-    public String getRefreshTokenFromHeader(HttpServletRequest request) {
-        return request.getHeader(RT_HEADER);
-    }
-
-    public void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(AT_HEADER, accessToken);
-    }
-
-    public void setRefreshTokenToHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(RT_HEADER, refreshToken);
-    }
-
-    public void setAccessTokenToBody(HttpServletResponse response, String accessToken) {
-        response.setHeader(AT_HEADER, accessToken);
-    }
-
-    public void setRefreshTokenToBody(HttpServletResponse response, String refreshToken) {
-        response.setHeader(RT_HEADER, refreshToken);
     }
 
 }
