@@ -26,7 +26,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     , nativeQuery = true)
     List<ChatInterface> getLastChatQuery(Long memberId);
 
-    List<Chat> getChatsBySendMemberIdAndRecvMemberIdOrSendMemberIdAndRecvMemberId(
+    List<Chat> getChatsBySendMemberIdAndRecvMemberIdOrSendMemberIdAndRecvMemberIdOrderByTimeStampDesc(
             Long sendMemberId_1,
             Long recvMemberId_1,
             Long sendMemberId_2,

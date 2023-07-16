@@ -75,7 +75,7 @@ public class ChatController {
 
         Long fromMemberId = chatGetRequest.getFromMemberId();
         Long toMemberId = chatGetRequest.getToMemberId();
-        List<Chat> chats = chatRepository.getChatsBySendMemberIdAndRecvMemberIdOrSendMemberIdAndRecvMemberId(
+        List<Chat> chats = chatRepository.getChatsBySendMemberIdAndRecvMemberIdOrSendMemberIdAndRecvMemberIdOrderByTimeStampDesc(
             fromMemberId, toMemberId, toMemberId, fromMemberId, PageRequest.of(chatGetRequest.getPage(), GET_MESSAGE_SIZE));
 
         ChatMessageResponse chatMessageResponse = new ChatMessageResponse(chatGetRequest.getToMemberId(), chats);
