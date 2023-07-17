@@ -6,6 +6,7 @@ import DKUDCoding20231Team3.VISTA.dto.database.ChatInterface;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -45,6 +46,7 @@ public class ChatUser {
     }
 
     public static ChatUser of(Long memberId, List<Chat> chats) {
+        Collections.reverse(chats);
         return ChatUser.builder()
                 .memberId(memberId)
                 .count(chats.size())
