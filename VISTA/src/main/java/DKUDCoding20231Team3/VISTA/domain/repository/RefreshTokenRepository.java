@@ -16,7 +16,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Transactional
     @Modifying
     @Query(value = "update RefreshToken as r set r.refreshToken = ?2 where r.memberId = ?1")
-    void saveRefreshTokenByMail(Long memberId, String refreshToken);
+    void updateRefreshTokenByMail(Long memberId, String refreshToken);
 
     boolean existsByMemberId(Long memberId);
 

@@ -1,6 +1,5 @@
 package DKUDCoding20231Team3.VISTA.dto.response;
 
-import DKUDCoding20231Team3.VISTA.jwt.JwtToken;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

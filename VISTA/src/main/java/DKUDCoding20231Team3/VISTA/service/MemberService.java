@@ -2,6 +2,7 @@ package DKUDCoding20231Team3.VISTA.service;
 
 import DKUDCoding20231Team3.VISTA.domain.entity.Member;
 import DKUDCoding20231Team3.VISTA.domain.entity.MemberLog;
+import DKUDCoding20231Team3.VISTA.domain.entity.RefreshToken;
 import DKUDCoding20231Team3.VISTA.domain.entity.SuggestRefresh;
 import DKUDCoding20231Team3.VISTA.domain.repository.*;
 import DKUDCoding20231Team3.VISTA.dto.database.MemberInterface;
@@ -90,10 +91,14 @@ public class MemberService implements UserDetailsService {
             throw new VistaException(INVALID_PASSWORD);
 
         Authentication authentication = jwtUtil.generateAuthentication(member.getMail(), member.getPassword());
-        String accessToken = jwtUtil.generateAccessToken(authentication);
-        String refreshToken = jwtUtil.generateRefreshToken(authentication);
+        String accessTokenString = jwtUtil.generateAccessToken(authentication);
+        String refreshTokenString = jwtUtil.generateRefreshToken(authentication);
 
-        return SignInResponse.of(accessToken, refreshToken);
+        RefreshToken refreshToken = RefreshToken.of(member.getMemberId(), refreshTokenString);
+
+        refreshTokenRepository.save(refreshToken);
+
+        return SignInResponse.of(accessTokenString, refreshTokenString);
     }
 
     public SuggestResponse suggest(String memberMail) {
