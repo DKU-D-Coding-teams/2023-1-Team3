@@ -87,6 +87,8 @@ public class MemberService implements UserDetailsService {
         final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
 
+        System.out.println("mail: " + requestedMemberMail + " pwd: " + requestedMemberPassword);
+
         if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
 
@@ -98,6 +100,7 @@ public class MemberService implements UserDetailsService {
 
         refreshTokenRepository.save(refreshToken);
 
+        System.out.println("accessTokenString: " + accessTokenString + " refreshTokenString: " + refreshTokenString);
         return SignInResponse.of(accessTokenString, refreshTokenString);
     }
 
