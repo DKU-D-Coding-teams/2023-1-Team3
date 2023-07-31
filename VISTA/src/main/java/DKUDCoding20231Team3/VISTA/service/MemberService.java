@@ -84,10 +84,10 @@ public class MemberService implements UserDetailsService {
     }
 
     public SignInResponse signIn(String requestedMemberMail, String requestedMemberPassword) {
+        System.out.println("mail: " + requestedMemberMail + " pwd: " + requestedMemberPassword);
+
         final Member member = memberRepository.findByMail(requestedMemberMail)
                 .orElseThrow(() -> new VistaException(NOT_FOUND_MEMBER));
-
-        System.out.println("mail: " + requestedMemberMail + " pwd: " + requestedMemberPassword);
 
         if(!passwordEncoder.matches(requestedMemberPassword, member.getPassword()))
             throw new VistaException(INVALID_PASSWORD);
