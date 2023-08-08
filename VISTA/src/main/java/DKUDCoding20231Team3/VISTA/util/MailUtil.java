@@ -17,9 +17,9 @@ public class MailUtil {
         String code = Integer.toString((int)(Math.random() * (999999 - 100000 + 1) + 100000));
 
         message.setTo(mail);
-        message.setSubject("[VISTA] 메일 인증코드 전송");
+        message.setSubject("[Dlink] 메일 인증코드 전송");
         message.setText(
-                "VISTA에서 회원 인증을 위한 코드를 전송했습니다.\n" +
+                "Dlink에서 회원 인증을 위한 코드를 전송했습니다.\n" +
                         "하단의 코드를 입력해주세요\n\n" +
                         "--\n" +
                         code +
