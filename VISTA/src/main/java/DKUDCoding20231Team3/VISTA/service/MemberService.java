@@ -65,7 +65,7 @@ public class MemberService implements UserDetailsService {
             throw new VistaException(INVALID_MAIL_CODE);
 
         redisUtil.deleteData(requestedMemberMail);
-        redisUtil.setDataExpire(requestedMemberMail, "OK", 60000);
+        redisUtil.setDataExpire(requestedMemberMail, "OK", 300000);
 
         return HttpStatus.CREATED;
     }
