@@ -1,16 +1,23 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
+type Props = {
+  memberId: number;
+  name: string;
+  imgSrc: string;
+  department: string;
+  age: number;
+  introduction: string;
+};
 export default function SettingScreenView({
   memberId,
   name,
   imgSrc,
   department,
   age,
-  getPopupStateFromChild,
   introduction,
   logoutHandler,
-}) {
+  getPopupStateFromChild,
+}: Props) {
   return (
     <>
       <label htmlFor="my-card" className="setting__user-content">

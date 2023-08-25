@@ -1,30 +1,30 @@
-import { createStore, combineReducers, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
-import { composeWithDevTools } from "redux-devtools-extension";
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import {
   userRegisterReducers,
   sendEmailReducers,
   userLoginReducers,
   codeVerificationReducers,
-} from "./reducers/userReducer";
-import { saveUserReducers, blockUserReducers } from "./reducers/buttonReducer";
-import { peopleListReducers } from "./reducers/peopleReducer";
+} from './reducers/userReducer';
+import { saveUserReducers, blockUserReducers } from './reducers/buttonReducer';
+import { peopleListReducers } from './reducers/peopleReducer';
 import {
   getPersonalInfoReducers,
   passwordEditReducers,
   personalInfoEditReducers,
   profileEditReducers,
   accountResignInfoReducers,
-} from "./reducers/securityEditReducer";
-import { getSaveListReducers } from "./reducers/saveReducer";
-import { deleteSaveReducers } from "./reducers/saveReducer";
+} from './reducers/securityEditReducer';
+import { getSaveListReducers } from './reducers/saveReducer';
+import { deleteSaveReducers } from './reducers/saveReducer';
 import {
   messageInitiateReducers,
   messageHistoryReducers,
   messageRelationReducers,
   messageSendReducers,
-} from "./reducers/messageReducer";
-import { socketMiddleware } from "./middlware/socketMiddleware";
+} from './reducers/messageReducer';
+
 const reducer = combineReducers({
   emailInfo: sendEmailReducers,
   registerInfo: userRegisterReducers,
@@ -46,8 +46,8 @@ const reducer = combineReducers({
   accountResignInfo: accountResignInfoReducers,
 });
 
-const tokenFromStorage = sessionStorage.getItem("sessfbs_ffa0934")
-  ? JSON.parse(sessionStorage.getItem("sessfbs_ffa0934"))
+const tokenFromStorage = sessionStorage.getItem('sessfbs_ffa0934')
+  ? JSON.parse(sessionStorage.getItem('sessfbs_ffa0934'))
   : null;
 
 // const userListFromStorage = localStorage.getItem("peopleListStatus")
@@ -70,5 +70,8 @@ const store = createStore(
   initialState,
   composeWithDevTools(applyMiddleware(...middleware))
 );
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export default store;

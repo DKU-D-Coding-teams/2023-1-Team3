@@ -1,9 +1,7 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Footer from '../../components/Footer';
-import { styled } from 'styled-components';
-import { SettingHeader } from '../../components/Header';
-import { batch, useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { batch } from 'react-redux';
 import { logoutAction } from '../../actions/userAction';
 import { getPersonalInfoAction } from '../../actions/securityEditAction';
 import { SECURITY_GET_PERSONALINFO_RESET } from '../../constants/securityEditConstants';
@@ -14,13 +12,22 @@ import MyCard from '../../components/Card/MyCard';
 import CardDetails from '../../components/PopupCard/CardDetails';
 import { getSaveListAction } from '../../actions/saveAction';
 import './Setting.scss';
+import { useAppDispatch, useAppSelector } from '../../hooks/ReduxHooks';
+import Header from '../../components/atoms/header/InstanceMaker';
+import Button from '../../components/atoms/button/InstanceMaker';
+import { IconChevronLeft } from '../../components/atoms/icon/IconChevron';
+import Footer from '../../components/atoms/footer/InstanceMaker';
 
-const SettingScreen = () => {
+export default function SettingScreen() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   /** 비밀번호 재설정 후 받는 response값 */
-  const personalInfo = useSelector((state) => state.personalInfo);
+  const personalInfo = useAppSelector((state) => state.personalInfo);
+
+  /** 자식 Popup boolean을 체크 후 style를 props로 주기위한 state */
+  const [userCardPopup, setUserCardPopup] = useState(false);
+  const [cardDetailsPopup, setCardDetailsPopup] = useState(false);
 
   const { loading, personalInfoStatus: user } = personalInfo;
 
@@ -36,81 +43,63 @@ const SettingScreen = () => {
     });
   }, []);
 
-  /** 자식 Popup boolean을 체크 후 style를 props로 주기위한 state */
-  const [userCardPopup, setUserCardPopup] = useState(false);
-  const [cardDetailsPopup, setCardDetailsPopup] = useState(false);
-
   const popupStyle = { display: userCardPopup ? 'none' : 'flex' };
   const age =
     new Date().getFullYear() - new Date(user?.birth).getFullYear() + 1;
 
   /** checked state(true or false)를 parameter로 받아 state로 저장 */
   const getPopupStateFromChild = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setUserCardPopup(e.target.checked);
     },
     [setUserCardPopup]
   );
 
-  const imgURL = getImageSrc(user);
-
   const props = {
     memberId: user?.memberId,
-    getPopupStateFromChild: getPopupStateFromChild,
-    imgSrc: imgURL,
+    getPopupStateFromChild,
+    imgSrc: getImageSrc(user),
     name: user?.name,
-    age: age,
+    age,
     department: user?.department,
     introduction: user?.introduction,
-    logoutHandler: logoutHandler,
-  };
-
-  const cardProps = {
-    user: user,
-    imageSrc: imgURL,
+    logoutHandler,
     goBackToScreen: () => setUserCardPopup(false),
     goBackToSlide: () => setCardDetailsPopup(false),
-
-    popupCheckedHandler: (e) => {
+    popupCheckedHandler: (e: React.ChangeEvent<HTMLInputElement>) => {
       setCardDetailsPopup(e.target.checked);
     },
-    popupStyle: popupStyle,
-    age: age,
+    popupStyle,
   };
+
   return (
     <>
       <section className="setting">
-        <SettingHeader navigate={navigate} name={'마이페이지'} />
+        <Header size="m" page="setting">
+          <Button
+            size="xl"
+            division="icon"
+            type="tertiary"
+            onClick={() => {
+              navigate(-1);
+            }}
+          >
+            <IconChevronLeft />
+          </Button>
+          <span className="header__title">마이페이지</span>
+        </Header>
         {loading ? <SettingScreenSkeleton /> : <SettingScreenView {...props} />}
-
-        <Footer />
+        <Footer page="setting" />
       </section>
       {userCardPopup && (
-        <MyCardBackground>
+        <div className="my-card">
           {cardDetailsPopup ? (
-            <CardDetails {...cardProps} />
+            <CardDetails {...props} />
           ) : (
-            <MyCard {...cardProps} />
+            <MyCard {...props} />
           )}
-        </MyCardBackground>
+        </div>
       )}
     </>
   );
-};
-
-const MyCardBackground = styled.div`
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.6);
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  div {
-    box-shadow: none;
-  }
-`;
-export default SettingScreen;
+}

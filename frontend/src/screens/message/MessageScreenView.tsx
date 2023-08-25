@@ -1,13 +1,26 @@
-import React from "react";
-import { styled } from "styled-components";
-import UserMessage from "../../components/UserMessage/UserMessage";
-import { MessageHeader } from "../../components/Header";
-import Footer from "../../components/Footer";
+import { styled } from 'styled-components';
+import UserMessage from '../../components/UserMessage/UserMessage';
+import Header from '../../components/atoms/header/InstanceMaker';
+import Button from '../../components/atoms/button/InstanceMaker';
+import { IconChevronLeft } from '../../components/atoms/icon/IconChevron';
+import Footer from '../../components/atoms/footer/InstanceMaker';
 
 const MessageScreenView = ({ navigate, n, messageUserList, startMessage }) => {
   return (
     <Message>
-      <MessageHeader navigate={navigate}></MessageHeader>
+      <Header page="message" size="xl">
+        <Button
+          size="xl"
+          division="icon"
+          type="tertiary"
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          <IconChevronLeft />
+        </Button>
+        <span className="header__title">Message</span>
+      </Header>
 
       <Row>
         <NewMessagesCount>{n}개의 새로운 메세지</NewMessagesCount>
@@ -23,7 +36,7 @@ const MessageScreenView = ({ navigate, n, messageUserList, startMessage }) => {
             );
           })}
       </Row>
-      <Footer />
+      <Footer page="message" />
     </Message>
   );
 };
