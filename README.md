@@ -28,7 +28,9 @@
 
 
 
-<video src="https://github.com/resetmerlin/DLink/assets/108568153/5fc88ec9-e4f9-44c0-a0ae-93a42fc13011"  width="200"/>
+
+https://github.com/DKU-D-Coding-teams/2023-1-Team3/assets/108568153/c52d54d3-a719-4b00-a3df-b0c1ecbd7478
+
 
 
 
@@ -63,10 +65,3 @@
 ![image](https://github.com/resetmerlin/DLink/assets/108568153/1c334f84-ef5d-4048-8214-991fd02a5420)
 
 
-
-
-
-
-
-## Architecture
-![image](https://github.com/resetmerlin/DLink/assets/108568153/1c334f84-ef5d-4048-8214-991fd02a5420)
