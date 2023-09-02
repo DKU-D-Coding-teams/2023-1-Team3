@@ -3,6 +3,7 @@
 
 
 
+
 ## DLink
 ### 친목도모 대학생 매칭 서비스 DLink!
 **📍 1. 비대면 지속으로 인한 사람들 간 교류 감소**
@@ -18,6 +19,16 @@
 => 친목도모 대학생 매칭 웹 서비스, 새로운 대학생 친구를 만나고 싶다면 DLink를 이용해보세요!
 
 ## 🖥 뷰 소개
+
+<img src="https://github.com/resetmerlin/DLink/assets/108568153/90c021a7-cdb0-45f9-be85-8b99b96c4137" width="300" alt="view-1"/>
+<img src="https://github.com/resetmerlin/DLink/assets/108568153/2345d7c5-c569-49df-8d3d-480d48a27102" width="300" alt="view-2"/>
+<img src="https://github.com/resetmerlin/DLink/assets/108568153/3e514f5d-0c7f-467b-bc41-d75c0c64a393" width="300" alt="view-3"/>
+<img src="https://github.com/resetmerlin/DLink/assets/108568153/338c052e-898f-43b5-9c65-d1a4bc7c514c" width="300" alt="view-4"/>
+<img src="https://github.com/resetmerlin/DLink/assets/108568153/213f6a3a-23b5-4c73-ac43-1cba69e5df2c" width="300" alt="view-5"/>
+
+
+
+<video src="https://github.com/resetmerlin/DLink/assets/108568153/5fc88ec9-e4f9-44c0-a0ae-93a42fc13011"  width="200"/>
 
 
 
@@ -46,6 +57,15 @@
 |Task management|![Jira](https://img.shields.io/badge/jira-%230A0FFF.svg?style=for-the-badge&logo=jira&logoColor=white)|
 |Communication| ![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)|`  
 |Tools|<img src="https://github.com/resetmerlin/DLink/assets/108568153/1dbab3e6-c460-4199-9073-a7a58ddaca16" width="200" alt="earser-io"/>|`  
+
+
+## Architecture
+![image](https://github.com/resetmerlin/DLink/assets/108568153/1c334f84-ef5d-4048-8214-991fd02a5420)
+
+
+
+
+
 
 
 ## Architecture
